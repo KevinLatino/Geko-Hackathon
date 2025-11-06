@@ -5,6 +5,7 @@ import { Routes, Route, Outlet, NavLink } from "react-router-dom";
 import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
+import MoonPayRamps from "./components/MoonPayRamps.tsx";
 
 const AppLayout: React.FC = () => (
   <main>
@@ -28,6 +29,43 @@ const AppLayout: React.FC = () => (
                   disabled={isActive}
                 >
                   Pool
+                </Button>
+              )}
+            </NavLink>
+            <NavLink
+              to="/debug"
+              style={{
+                textDecoration: "none",
+                marginLeft: "0.5rem",
+              }}
+            >
+              {({ isActive }) => (
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  onClick={() => (window.location.href = "/debug")}
+                  disabled={isActive}
+                >
+                  <Icon.Code02 size="md" />
+                  Debugger
+                </Button>
+              )}
+            </NavLink>
+            <NavLink
+              to="/moonpay"
+              style={{
+                textDecoration: "none",
+                marginLeft: "0.5rem",
+              }}
+            >
+              {({ isActive }) => (
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  onClick={() => (window.location.href = "/moonpay")}
+                  disabled={isActive}
+                >
+                  MoonPay
                 </Button>
               )}
             </NavLink>
@@ -80,6 +118,7 @@ function App() {
         <Route path="/pool/Test" element={<Pool />} />
         <Route path="/debug" element={<Debugger />} />
         <Route path="/debug/:contractName" element={<Debugger />} />
+        <Route path="/moonpay" element={<MoonPayRamps />} />
       </Route>
     </Routes>
   );
