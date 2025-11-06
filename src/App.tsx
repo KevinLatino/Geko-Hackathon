@@ -4,6 +4,7 @@ import ConnectAccount from "./components/ConnectAccount.tsx";
 import { Routes, Route, Outlet, NavLink } from "react-router-dom";
 import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
+import Pool from "./pages/Pool.tsx";
 
 const AppLayout: React.FC = () => (
   <main>
@@ -14,9 +15,27 @@ const AppLayout: React.FC = () => (
         <>
           <nav>
             <NavLink
+              to="/pool/Test"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              {({ isActive }) => (
+                <Button
+                  variant="tertiary"
+                  size="md"
+                  onClick={() => (window.location.href = "/pool/Test")}
+                  disabled={isActive}
+                >
+                  Pool
+                </Button>
+              )}
+            </NavLink>
+            <NavLink
               to="/debug"
               style={{
                 textDecoration: "none",
+                marginLeft: "0.5rem",
               }}
             >
               {({ isActive }) => (
@@ -58,6 +77,7 @@ function App() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/pool/Test" element={<Pool />} />
         <Route path="/debug" element={<Debugger />} />
         <Route path="/debug/:contractName" element={<Debugger />} />
       </Route>

@@ -50,6 +50,14 @@ export const useWalletBalance = () => {
           isFunded: false,
           error: new Error("Error fetching balance. Is your wallet funded?"),
         });
+      } else if (err instanceof Error && err.message.match(/network error|connection refused/i)) {
+        setState({
+          isLoading: false,
+          balances: [],
+          xlm: "-",
+          isFunded: false,
+          error: new Error("Network connection error. Check your network configuration in .env file."),
+        });
       } else {
         console.error(err);
         setState({

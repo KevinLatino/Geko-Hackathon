@@ -11,12 +11,21 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier . --write",
-    "prepare": "husky"
+    "prepare": "husky",
+    "pool:deploy": "tsx src/blend/pool/deploy-pool.ts",
+    "pool:status": "tsx src/blend/pool/set-status.ts",
+    "pool:update-status": "tsx src/blend/pool/update-status.ts",
+    "pool:distribute": "tsx src/blend/pool/distribute.ts",
+    "pool:revoke-admin": "tsx src/blend/pool/revoke-admin.ts",
+    "pool:verify": "tsx src/blend/pool/verify-pool.ts",
+    "admin:generate": "tsx src/blend/utils/generate-admin-key.ts",
+    "admin:from-mnemonic": "tsx src/blend/utils/mnemonic-to-key.ts"
   },
   "workspaces": [
     "packages/*"
   ],
   "dependencies": {
+    "@blend-capital/blend-sdk": "^3.2.1",
     "@creit.tech/stellar-wallets-kit": "^1.9.5",
     "@stellar/design-system": "^3.1.5",
     "@stellar/stellar-sdk": "^14.2.0",
@@ -47,6 +56,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.2.3",
     "prettier": "3.6.2",
+    "tsx": "^4.19.2",
     "typescript": "~5.9.2",
     "typescript-eslint": "^8.45.0",
     "vite": "^7.1.11",

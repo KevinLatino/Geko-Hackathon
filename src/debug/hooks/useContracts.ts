@@ -24,9 +24,14 @@ const loadContracts = async () => {
 
     try {
       const module = (await importFn()) as ContractModule;
-      const metadata = await loadContractMetadata(
-        module.default.options.contractId,
-      );
+      const contractId = module.default.options.contractId;
+      
+      if (contractId && contractId.includes("STUB") || contractId === "") {
+        failed[filename] = "Contract stub - not deployed yet. Run 'stellar scaffold watch --build-clients'";
+        continue;
+      }
+
+      const metadata = await loadContractMetadata(contractId);
       loadedContracts[filename] = { ...module, metadata };
     } catch (error) {
       failed[filename] = error instanceof Error ? error.message : String(error);
