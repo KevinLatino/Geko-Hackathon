@@ -16,8 +16,7 @@ jobs:
     with:
       release_name: ${{ github.ref_name }}
       release_description: 'Geko Token release'
-      # Build the contract located at contracts/geko-token
-      relative_path: '["contracts/geko-token"]'
+      relative_path: 'contracts/geko-token'
       package: 'geko-token'
       # Optionally set home_domain for the contract (displayed in explorers)
       # home_domain: 'your-domain.example'
