@@ -1,0 +1,27 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*' # triggered whenever a new tag (prefixed with "v") is pushed
+
+permissions:
+  id-token: write
+  contents: write
+  attestations: write
+
+jobs:
+  release-geko-token:
+    uses: stellar-expert/soroban-build-workflow/.github/workflows/release.yml@main
+    with:
+      release_name: ${{ github.ref_name }}
+      release_description: 'Geko Token release'
+      # Build the contract located at contracts/geko-token
+      relative_path: '["contracts/geko-token"]'
+      package: 'geko-token'
+      # Optionally set home_domain for the contract (displayed in explorers)
+      # home_domain: 'your-domain.example'
+    secrets:
+      release_token: ${{ secrets.GITHUB_TOKEN }}
+
+
