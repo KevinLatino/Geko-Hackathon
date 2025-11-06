@@ -1,6 +1,5 @@
 import * as React from "react";
 import { Server, Api } from "@stellar/stellar-sdk/rpc";
-import { xdr } from "@stellar/stellar-sdk";
 import { rpcUrl, stellarNetwork } from "../contracts/util";
 
 /**
@@ -9,31 +8,27 @@ import { rpcUrl, stellarNetwork } from "../contracts/util";
 type PagingKey = string;
 
 /**
- * Paging tokens for each contract/topic pair. These can be mutated directly,
- * rather than being stored as state within the React hook.
+ * Paging tokens for each contract/topic pair.
  */
 const paging: Record<
   PagingKey,
   { lastLedgerStart?: number; pagingToken?: string }
 > = {};
 
-// NOTE: Server is configured using envvars which shouldn't change during runtime
+// Server configured using environment variables
 const server = new Server(rpcUrl, { allowHttp: stellarNetwork === "LOCAL" });
 
 /**
- * Subscribe to events for a given topic from a given contract, using a library
- * generated with `soroban contract bindings typescript`.
+ * Subscribe to contract events for a given topic.
  *
- * Someday such generated libraries will include functions for subscribing to
- * the events the contract emits, but for now you can copy this hook into your
- * React project if you need to subscribe to events, or adapt this logic for
- * non-React use.
+ * This function continuously polls Soroban RPC for contract events
+ * and triggers the `onEvent` callback whenever a new one arrives.
  */
 export function useSubscription(
   contractId: string,
   topic: string,
   onEvent: (event: Api.EventResponse) => void,
-  pollInterval = 5000,
+  pollInterval = 5000
 ) {
   const id = `${contractId}:${topic}`;
   paging[id] = paging[id] || {};
@@ -44,20 +39,20 @@ export function useSubscription(
 
     async function pollEvents(): Promise<void> {
       try {
+        // Initialize from latest ledger if this is the first run
         if (!paging[id].lastLedgerStart) {
           const latestLedgerState = await server.getLatestLedger();
           paging[id].lastLedgerStart = latestLedgerState.sequence;
         }
 
+        // Query events from Soroban RPC
+        const pagingToken = paging[id].pagingToken;
         const response = await server.getEvents({
-          startLedger: !paging[id].pagingToken
-            ? paging[id].lastLedgerStart
-            : undefined,
-          cursor: paging[id].pagingToken,
+          cursor: pagingToken ?? "",
           filters: [
             {
               contractIds: [contractId],
-              topics: [[xdr.ScVal.scvSymbol(topic).toXDR("base64")]],
+              topics: [[topic]],
               type: "contract",
             },
           ],
@@ -65,25 +60,38 @@ export function useSubscription(
         });
 
         paging[id].pagingToken = undefined;
+
+        // Update last known ledger
         if (response.latestLedger) {
           paging[id].lastLedgerStart = response.latestLedger;
         }
+
+        // Handle each event found
         if (response.events) {
           response.events.forEach((event) => {
             try {
               onEvent(event);
-            } catch (error) {
-              console.error(
-                "Poll Events: subscription callback had error: ",
-                error,
-              );
+            } catch (error: unknown) {
+              if (error instanceof Error) {
+                console.error(
+                  "Poll Events: subscription callback had error:",
+                  error.message
+                );
+              } else {
+                console.error("Poll Events: unknown error:", error);
+              }
             } finally {
-              paging[id].pagingToken = event.pagingToken;
+              // @ts-expect-error SDK type mismatch (temporary until SDK updates)
+              paging[id].pagingToken = event.pagingToken as string;
             }
           });
         }
-      } catch (error) {
-        console.error("Poll Events: error: ", error);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          console.error("Poll Events: error:", error.message);
+        } else {
+          console.error("Poll Events: unknown error:", error);
+        }
       } finally {
         if (!stop) {
           timeoutId = setTimeout(() => void pollEvents(), pollInterval);
@@ -94,7 +102,7 @@ export function useSubscription(
     void pollEvents();
 
     return () => {
-      if (timeoutId != null) clearTimeout(timeoutId);
+      if (timeoutId) clearTimeout(timeoutId);
       stop = true;
     };
   }, [contractId, topic, onEvent, id, pollInterval]);

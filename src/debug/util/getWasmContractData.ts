@@ -12,7 +12,7 @@ import {
 
 export const getWasmContractData = async (wasmBytes: Buffer) => {
   try {
-    const mod = await WebAssembly.compile(wasmBytes);
+    const mod = await WebAssembly.compile(Uint8Array.from(wasmBytes).buffer);
 
     const result: Record<ContractSectionName, ContractData> = {
       contractmetav0: {},
@@ -46,7 +46,7 @@ export const getWasmContractData = async (wasmBytes: Buffer) => {
 
 const sectionResult = (
   sectionName: ContractSectionName,
-  section: ArrayBuffer,
+  section: ArrayBuffer
 ) => {
   const sectionData = new Uint8Array(section);
   const sectionXdr = Buffer.from(sectionData).toString("base64");
@@ -69,13 +69,13 @@ const getJsonAndXdr = (sectionName: ContractSectionName, xdr: string) => {
   try {
     const jsonStringArray = StellarXdr.decode_stream(
       TYPE_VARIANT[sectionName],
-      xdr,
+      xdr
     );
 
     return {
       json: jsonStringArray.map((s: string) => prettifyJsonString(s)),
       xdr: jsonStringArray.map((s: string) =>
-        StellarXdr.encode(TYPE_VARIANT[sectionName], s),
+        StellarXdr.encode(TYPE_VARIANT[sectionName], s)
       ),
     };
   } catch (e) {
