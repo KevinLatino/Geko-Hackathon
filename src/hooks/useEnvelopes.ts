@@ -1,5 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
-import { Client as GekoEnvelopesClient } from "geko_envelopes";
+import { Client as GekoEnvelopesClient, type Envelope } from "geko_envelopes";
 import { useWallet } from "./useWallet";
 import { rpcUrl } from "../contracts/util";
 import type { AssembledTransaction } from "@stellar/stellar-sdk/contract";
@@ -16,7 +16,7 @@ export function useEnvelopes(contractId: string) {
     console.warn("⚠️ Wallet not connected or missing network info");
   }
 
-  // CORRECCIÓN: Pasar publicKey y signTransaction al constructor del Cliente
+  // Cliente del contrato configurado
   const contract = useMemo(() => {
     if (!networkPassphrase || !address || !signTransaction) return null;
 
@@ -24,24 +24,20 @@ export function useEnvelopes(contractId: string) {
       contractId,
       networkPassphrase,
       rpcUrl,
-      publicKey: address, // ← IMPORTANTE: Pasar el publicKey aquí
-      signTransaction, // ← IMPORTANTE: Pasar signTransaction aquí
+      publicKey: address,
+      signTransaction,
     });
   }, [contractId, networkPassphrase, address, signTransaction]);
 
-  // Ahora signAndSend NO recibe el callback, ya está en el cliente
+  // Firma y envío de transacciones (genérico para cualquier resultado)
   const handleTx = useCallback(
-    async (assembled: AssembledTransaction<null>) => {
+    async <T>(assembled: AssembledTransaction<T>) => {
       if (!contract) {
         throw new Error("Contract not initialized");
       }
-
       try {
         console.log("📄 XDR before signing:", assembled.toXDR());
-
-        // signAndSend ya tiene acceso al signTransaction del cliente
         const response = await assembled.signAndSend();
-
         console.log("✅ Transaction sent:", response);
         return response;
       } catch (err) {
@@ -52,21 +48,20 @@ export function useEnvelopes(contractId: string) {
     [contract]
   );
 
+  /** 🆕 Crear un nuevo envelope
+   *  - name y description validados (solo alfanumérico y _)
+   *  - tokenContract: dirección del token (XLM nativo => contrato wrapper si aplica, o el contrato de USDC)
+   *  - create retorna u64 -> bindings usan bigint como tipo de resultado
+   */
   const createEnvelope = useCallback(
-    async (name: string, description: string) => {
+    async (name: string, description: string, tokenContract: string) => {
       if (!contract || !address) {
         console.error("Contract not ready or wallet address missing");
         return;
       }
-      if (!isValidSymbol(name)) {
+      if (!isValidSymbol(name) || !isValidSymbol(description)) {
         console.error(
-          "Invalid 'name'. Use only alphanumeric or underscore, no spaces."
-        );
-        return;
-      }
-      if (!isValidSymbol(description)) {
-        console.error(
-          "Invalid 'description'. Use only alphanumeric or underscore, no spaces."
+          "Invalid 'name' or 'description'. Use only alphanumeric or underscore."
         );
         return;
       }
@@ -74,16 +69,14 @@ export function useEnvelopes(contractId: string) {
       console.log("👤 Using user:", address, "for createEnvelope");
       setLoading(true);
       try {
-        const assembled: AssembledTransaction<null> = await contract.create(
-          {
-            user: address,
-            name,
-            description,
-          },
-          {
-            simulate: true,
-          }
-        );
+        // ❌ Quitar simulate:true → queremos transacción real
+        const assembled = await contract.create({
+          user: address,
+          name,
+          description,
+          token_contract: tokenContract,
+        });
+
         const res = await handleTx(assembled);
         const hash = res.sendTransactionResponse?.hash;
         console.log("✅ Envelope created:", hash);
@@ -98,27 +91,18 @@ export function useEnvelopes(contractId: string) {
     [address, contract, handleTx]
   );
 
+  /** 💰 Depositar tokens en un envelope (id: u64 -> bigint en TS) */
   const deposit = useCallback(
-    async (name: string, amount: bigint) => {
+    async (id: bigint, amount: bigint) => {
       if (!contract || !address) {
         console.error("Contract not ready or wallet address missing");
-        return;
-      }
-      if (!isValidSymbol(name)) {
-        console.error(
-          "Invalid 'name'. Use only alphanumeric or underscore, no spaces."
-        );
         return;
       }
 
       console.log("👤 Using user:", address, "for deposit");
       setLoading(true);
       try {
-        const assembled: AssembledTransaction<null> = await contract.deposit({
-          user: address,
-          name,
-          amount,
-        });
+        const assembled = await contract.deposit({ user: address, id, amount });
         const res = await handleTx(assembled);
         const hash = res.sendTransactionResponse?.hash;
         console.log("💰 Deposit successful:", hash);
@@ -133,25 +117,20 @@ export function useEnvelopes(contractId: string) {
     [address, contract, handleTx]
   );
 
+  /** 💸 Retirar tokens */
   const withdraw = useCallback(
-    async (name: string, amount: bigint) => {
+    async (id: bigint, amount: bigint) => {
       if (!contract || !address) {
         console.error("Contract not ready or wallet address missing");
-        return;
-      }
-      if (!isValidSymbol(name)) {
-        console.error(
-          "Invalid 'name'. Use only alphanumeric or underscore, no spaces."
-        );
         return;
       }
 
       console.log("👤 Using user:", address, "for withdraw");
       setLoading(true);
       try {
-        const assembled: AssembledTransaction<null> = await contract.withdraw({
+        const assembled = await contract.withdraw({
           user: address,
-          name,
+          id,
           amount,
         });
         const res = await handleTx(assembled);
@@ -168,22 +147,21 @@ export function useEnvelopes(contractId: string) {
     [address, contract, handleTx]
   );
 
+  /** 📊 Obtener balance (view) */
   const getBalance = useCallback(
-    async (name: string) => {
+    async (id: bigint): Promise<bigint | undefined> => {
       if (!contract || !address) {
         console.error("Contract not ready or wallet address missing");
-        return;
-      }
-      if (!isValidSymbol(name)) {
-        console.error("Invalid 'name'.");
         return;
       }
 
       console.log("👤 Using user:", address, "for getBalance");
       try {
-        const assembled = await contract.get_balance({ user: address, name });
+        // Para view functions, obtenemos el resultado de la simulación
+        const assembled = await contract.get_balance({ user: address, id });
+        // El resultado está disponible en assembled.result después de la simulación
         const result = assembled.result;
-        console.log("📊 Balance for", name, "is", result);
+        console.log("📊 Balance for envelope", id, "is", result);
         return result;
       } catch (e) {
         console.error("❌ Get balance failed:", e);
@@ -192,5 +170,31 @@ export function useEnvelopes(contractId: string) {
     [address, contract]
   );
 
-  return { loading, createEnvelope, deposit, withdraw, getBalance };
+  /** 📜 Listar sobres del usuario (view) */
+  const listEnvelopes = useCallback(async (): Promise<Envelope[]> => {
+    if (!contract || !address) {
+      console.error("Contract not ready or wallet address missing");
+      return [];
+    }
+    try {
+      // Para view functions, obtenemos el resultado de la simulación
+      const assembled = await contract.list_envelopes({ user: address });
+      // El resultado está disponible en assembled.result después de la simulación
+      const result = assembled.result || [];
+      console.log("📦 User envelopes:", result);
+      return result;
+    } catch (e) {
+      console.error("❌ Error listing envelopes:", e);
+      return [];
+    }
+  }, [address, contract]);
+
+  return {
+    loading,
+    createEnvelope,
+    deposit,
+    withdraw,
+    getBalance,
+    listEnvelopes,
+  };
 }
