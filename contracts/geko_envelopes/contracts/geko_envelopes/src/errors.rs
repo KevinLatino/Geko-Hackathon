@@ -1,3 +1,5 @@
+// src/errors.rs
+
 use soroban_sdk::contracterror;
 
 #[contracterror]
