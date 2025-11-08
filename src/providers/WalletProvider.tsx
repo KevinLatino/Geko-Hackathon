@@ -33,7 +33,15 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     useState<Omit<WalletContextType, "isPending">>(initialState);
   const [isPending, startTransition] = useTransition();
   const popupLock = useRef(false);
-  const signTransaction = wallet.signTransaction.bind(wallet);
+  
+  // Create a wrapper function that ensures wallet is set before signing
+  const signTransaction = async (xdr: string, opts?: { networkPassphrase?: string; address?: string }) => {
+    const walletId = storage.getItem("walletId");
+    if (walletId) {
+      wallet.setWallet(walletId);
+    }
+    return wallet.signTransaction(xdr, opts);
+  };
 
   const nullify = () => {
     updateState(initialState);
@@ -65,51 +73,70 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
     const walletAddr = storage.getItem("walletAddress");
     const passphrase = storage.getItem("networkPassphrase");
 
+    // If no wallet is stored, clear everything
+    if (!walletId) {
+      nullify();
+      return;
+    }
+
+    // If we have all the data in localStorage and state is not set, restore it
     if (
       !state.address &&
-      walletAddr !== null &&
-      walletNetwork !== null &&
-      passphrase !== null
+      walletAddr &&
+      walletNetwork &&
+      passphrase
     ) {
       updateState({
         address: walletAddr,
         network: walletNetwork,
         networkPassphrase: passphrase,
       });
+      return;
     }
 
-    if (!walletId) {
-      nullify();
-    } else {
+    // For non-Freighter wallets, trust localStorage data if available
+    if (walletId !== "freighter" && walletAddr && walletNetwork && passphrase) {
+      if (state.address !== walletAddr) {
+        updateState({
+          address: walletAddr,
+          network: walletNetwork,
+          networkPassphrase: passphrase,
+        });
+      }
+      return;
+    }
+
+    // For Freighter wallet, periodically check if still connected
+    if (walletId === "freighter") {
       if (popupLock.current) return;
-      // If our storage item is there, then we try to get the user's address &
-      // network from their wallet. Note: `getAddress` MAY open their wallet
-      // extension, depending on which wallet they select!
+      
       try {
         popupLock.current = true;
         wallet.setWallet(walletId);
-        if (walletId !== "freighter" && walletAddr !== null) return;
+        
         const [a, n] = await Promise.all([
           wallet.getAddress(),
           wallet.getNetwork(),
         ]);
 
-        if (!a.address) storage.setItem("walletId", "");
-        if (
+        if (!a.address) {
+          // Wallet was disconnected
+          nullify();
+        } else if (
           a.address !== state.address ||
           n.network !== state.network ||
           n.networkPassphrase !== state.networkPassphrase
         ) {
+          // Update if data changed
           storage.setItem("walletAddress", a.address);
+          storage.setItem("walletNetwork", n.network);
+          storage.setItem("networkPassphrase", n.networkPassphrase);
           updateState({ ...a, ...n });
         }
       } catch (e) {
-        // If `getNetwork` or `getAddress` throw errors... sign the user out???
-        nullify();
-        // then log the error (instead of throwing) so we have visibility
-        // into the error while working on Scaffold Stellar but we do not
-        // crash the app process
-        console.error(e);
+        // If there's an error, don't immediately disconnect
+        // Just log it - the user might have closed the popup
+        console.error("Error checking wallet state:", e);
       } finally {
         popupLock.current = false;
       }
@@ -119,6 +146,22 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     let timer: NodeJS.Timeout;
     let isMounted = true;
+
+    // Load wallet from localStorage immediately on mount
+    const initializeWallet = () => {
+      const walletAddr = storage.getItem("walletAddress");
+      const walletNetwork = storage.getItem("walletNetwork");
+      const passphrase = storage.getItem("networkPassphrase");
+
+      // If we have stored wallet data, restore it immediately
+      if (walletAddr && walletNetwork && passphrase) {
+        updateState({
+          address: walletAddr,
+          network: walletNetwork,
+          networkPassphrase: passphrase,
+        });
+      }
+    };
 
     // Create recursive polling function to check wallet state continuously
     const pollWalletState = async () => {
@@ -130,6 +173,9 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
         timer = setTimeout(() => void pollWalletState(), POLL_INTERVAL);
       }
     };
+
+    // Initialize wallet state immediately from localStorage
+    initializeWallet();
 
     // Get the wallet address when the component is mounted for the first time
     startTransition(async () => {
@@ -146,7 +192,8 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       isMounted = false;
       if (timer) clearTimeout(timer);
     };
-  }, [state]); // eslint-disable-line react-hooks/exhaustive-deps -- it SHOULD only run once per component mount
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only run once on mount
 
   const contextValue = useMemo(
     () => ({

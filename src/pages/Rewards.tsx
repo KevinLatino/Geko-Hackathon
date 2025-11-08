@@ -1,12 +1,13 @@
 import React from "react";
 import { Text } from "@stellar/design-system";
 
-const Home: React.FC = () => (
+const Rewards: React.FC = () => (
   <div className="flex flex-col items-center justify-center h-full w-full min-h-screen">
     <Text as="h1" size="xl" className="text-white">
-      Welcome to your app!
+      Rewards Page
     </Text>
   </div>
 );
 
-export default Home;
+export default Rewards;
+
