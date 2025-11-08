@@ -152,9 +152,9 @@ const Pool: React.FC = () => {
   };
 
   return (
-    <div className="pool-container">
+    <div className="pool-container lg:p-1 md:p-5 sm:p-5">
       {/* Currency Selection Cards */}
-      <div className="currency-cards">
+      <div className="currency-cards ">
         <button
           className={`currency-card ${selectedCurrency === "USDC" ? "active" : ""}`}
           onClick={() => setSelectedCurrency("USDC")}
@@ -164,7 +164,7 @@ const Pool: React.FC = () => {
                 ? `url(/designs/USDC-FullColor.svg)`
                 : `url(/designs/USDC-WhiteBlack.svg)`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center bottom -10px",
             backgroundRepeat: "no-repeat",
           }}
         >
@@ -186,7 +186,7 @@ const Pool: React.FC = () => {
                 ? `url(/designs/Stellar-FullColor.svg)`
                 : `url(/designs/Stellar-WhiteBlack.svg)`,
             backgroundSize: "cover",
-            backgroundPosition: "center",
+            backgroundPosition: "center bottom -10px",
             backgroundRepeat: "no-repeat",
           }}
         >
