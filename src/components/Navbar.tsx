@@ -2,6 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@stellar/design-system";
 import WalletModal from "./WalletModal";
+import { ChevronsRight, ChevronsLeft } from 'lucide-react';
 
 interface NavbarProps {
   isWalletDrawerOpen: boolean;
@@ -30,7 +31,7 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
       path: "/analytics",
       icon: <Icon.BarChart07 size="lg" />,
       label: "Analytics",
-    },
+    }
   ];
 
   return (
@@ -41,9 +42,13 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
           <button
             className="logo-icon"
             onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
-            title="Open Wallet"
+            title={isWalletDrawerOpen ? "Close Wallet" : "Open Wallet"}
           >
-            <Icon.ActivityHeart size="xl" />
+            {isWalletDrawerOpen ? (
+              <ChevronsLeft className="w-5 h-5"/>
+            ) : (
+              <ChevronsRight className="w-5 h-5"/>
+            )}
           </button>
         </div>
 

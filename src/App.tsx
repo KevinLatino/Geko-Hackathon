@@ -38,8 +38,11 @@ const AppLayout: React.FC = () => {
 function App() {
   return (
     <Routes>
+      {/* Route without navbar */}
+      <Route path="/" element={<Home />} />
+      
+      {/* Routes with navbar */}
       <Route element={<AppLayout />}>
-        <Route path="/" element={<Home />} />
         <Route path="/pool/Test" element={<Pool />} />
         <Route path="/rewards" element={<Rewards />} />
         <Route path="/analytics" element={<Analytics />} />
