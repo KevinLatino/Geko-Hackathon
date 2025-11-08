@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Icon } from "@stellar/design-system";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { useNavigate } from "react-router-dom";
 
 interface WalletModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
   const { address } = useWallet();
   const { xlm } = useWalletBalance();
   const [activeFilter, setActiveFilter] = useState<TimeFilter>("Month");
+  const navigate = useNavigate();
 
   // Mock transactions data - replace with real data later
   const transactions = [
@@ -56,7 +58,10 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
             <Icon.Send02 size="lg" />
             <span>Send</span>
           </button>
-          <button className="wallet-action-btn">
+          <button 
+            className="wallet-action-btn"
+            onClick={() => navigate("/receive")}
+          >
             <Icon.Download01 size="lg" />
             <span>Receive</span>
           </button>
