@@ -1,9 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { useTransactions } from "../hooks/useTransactions";
 import { useNavigate } from "react-router-dom";
-import { Send, ArrowDownToLine, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Send, ArrowDownToLine, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
 import { stellarNetwork } from "../contracts/util";
 
 interface WalletModalProps {
@@ -11,11 +11,33 @@ interface WalletModalProps {
   onClose: () => void;
 }
 
+type CurrencyView = "XLM" | "USD";
+
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
   const { address } = useWallet();
-  const { xlm } = useWalletBalance();
+  const { xlm, balances } = useWalletBalance();
   const { transactions, loading } = useTransactions();
   const navigate = useNavigate();
+  const [currencyView, setCurrencyView] = useState<CurrencyView>("XLM");
+  const [isFlipping, setIsFlipping] = useState(false);
+
+  // Calculate total balance in USD
+  const usdcBalance = balances.find(b => 
+    b.asset_type !== "native" && b.asset_type !== "liquidity_pool_shares" && b.asset_code === "USDC"
+  );
+  const totalUSD = (parseFloat(xlm || "0") * 0.1) + parseFloat(usdcBalance?.balance || "0"); // Assuming XLM = $0.10 for demo
+
+  const handleCurrencySwitch = () => {
+    setIsFlipping(true);
+    
+    setTimeout(() => {
+      setCurrencyView(prev => prev === "XLM" ? "USD" : "XLM");
+    }, 300); // Switch content when opacity is 0 (middle of flip)
+    
+    setTimeout(() => {
+      setIsFlipping(false);
+    }, 600);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -43,26 +65,40 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
     <>
       {/* Modal Content */}
       <div className={`wallet-modal ${isOpen ? "open" : ""}`}>
-        {/* Card with SVG Background */}
-        <div className="wallet-card">
-          <img
-            src="/designs/GekoCard.svg"
-            alt="Wallet Card"
-            className="wallet-card-bg"
-          />
-          <div className="wallet-card-content">
-            <div className="wallet-card-balance">
-              <span className="wallet-balance-label">Balance</span>
-              <span className="wallet-balance-amount">
-                ${xlm || "0.00"}
-              </span>
+        {/* Card with SVG Background and Flip Animation */}
+        <div className="wallet-card-container">
+          <div className={`wallet-card ${isFlipping ? 'flipping' : ''}`}>
+            <img
+              src={currencyView === "XLM" ? "/designs/GekoCard.svg" : "/designs/GekoCardRed.svg"}
+              alt="Wallet Card"
+              className="wallet-card-bg"
+            />
+            <div className="wallet-card-content">
+              <div className="wallet-card-balance">
+                <span className="wallet-balance-label">Balance</span>
+                <span className="wallet-balance-amount">
+                  {currencyView === "XLM" 
+                    ? `${xlm} XLM`
+                    : `$${totalUSD.toFixed(2)}`
+                  }
+                </span>
+              </div>
+              <div className="wallet-card-owner">
+                <span className="wallet-owner-label">Owner</span>
+                <span className="wallet-owner-name">
+                  {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Not Connected"}
+                </span>
+              </div>
             </div>
-            <div className="wallet-card-owner">
-              <span className="wallet-owner-label">Owner</span>
-              <span className="wallet-owner-name">
-                {address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "Not Connected"}
-              </span>
-            </div>
+            
+            {/* Currency Switcher Button */}
+            <button 
+              className="wallet-card-switcher"
+              onClick={handleCurrencySwitch}
+              disabled={isFlipping}
+            >
+              <RefreshCw size={16} className={isFlipping ? 'rotating' : ''} />
+            </button>
           </div>
         </div>
 

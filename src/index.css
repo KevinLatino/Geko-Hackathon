@@ -327,13 +327,32 @@ th, td {
 }
 
 /* Wallet Card */
+.wallet-card-container {
+  perspective: 1000px;
+  width: 100%;
+  aspect-ratio: 435/261;
+  margin-bottom: 20px;
+}
+
 .wallet-card {
   position: relative;
   width: 100%;
-  aspect-ratio: 435/261;
+  height: 100%;
   border-radius: 20px;
   overflow: hidden;
-  margin-bottom: 20px;
+}
+
+.wallet-card.flipping {
+  animation: flipCard360 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes flipCard360 {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(360deg);
+  }
 }
 
 .wallet-card-bg {
@@ -356,6 +375,77 @@ th, td {
   flex-direction: column;
   justify-content: space-between;
   z-index: 1;
+}
+
+/* Hide content during flip animation */
+.wallet-card.flipping .wallet-card-bg,
+.wallet-card.flipping .wallet-card-content,
+.wallet-card.flipping .wallet-card-switcher {
+  animation: hideContent 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes hideContent {
+  0% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.2;
+  }
+  60% {
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.wallet-card-switcher {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 2;
+  color: #FFFFFF;
+}
+
+.wallet-card-switcher:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
+}
+
+.wallet-card-switcher:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.wallet-card-switcher svg {
+  transition: transform 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.wallet-card-switcher svg.rotating {
+  animation: rotateIcon 0.6s cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+@keyframes rotateIcon {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .wallet-card-balance {
