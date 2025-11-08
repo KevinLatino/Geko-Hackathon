@@ -5,7 +5,7 @@ import { Routes, Route, Outlet, NavLink } from "react-router-dom";
 import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
-import EnvelopesPage from "./pages/Envelopes.tsx";
+import EnvelopesPage from "./components/modules/envelopes/pages/EnvelopesPage.tsx";
 
 const AppLayout: React.FC = () => (
   <main>

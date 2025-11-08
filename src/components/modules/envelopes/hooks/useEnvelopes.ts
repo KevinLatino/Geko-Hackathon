@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from "react";
 import { Client as GekoEnvelopesClient, type Envelope } from "geko_envelopes";
-import { useWallet } from "./useWallet";
-import { rpcUrl } from "../contracts/util";
+import { useWallet } from "../../../../hooks/useWallet";
+import { rpcUrl } from "../../../../contracts/util";
 import type { AssembledTransaction } from "@stellar/stellar-sdk/contract";
 
 function isValidSymbol(str: string): boolean {
@@ -48,11 +48,7 @@ export function useEnvelopes(contractId: string) {
     [contract]
   );
 
-  /** 🆕 Crear un nuevo envelope
-   *  - name y description validados (solo alfanumérico y _)
-   *  - tokenContract: dirección del token (XLM nativo => contrato wrapper si aplica, o el contrato de USDC)
-   *  - create retorna u64 -> bindings usan bigint como tipo de resultado
-   */
+  /** 🆕 Crear un nuevo envelope */
   const createEnvelope = useCallback(
     async (name: string, description: string, tokenContract: string) => {
       if (!contract || !address) {
@@ -69,7 +65,6 @@ export function useEnvelopes(contractId: string) {
       console.log("👤 Using user:", address, "for createEnvelope");
       setLoading(true);
       try {
-        // ❌ Quitar simulate:true → queremos transacción real
         const assembled = await contract.create({
           user: address,
           name,
@@ -91,7 +86,7 @@ export function useEnvelopes(contractId: string) {
     [address, contract, handleTx]
   );
 
-  /** 💰 Depositar tokens en un envelope (id: u64 -> bigint en TS) */
+  /** 💰 Depositar tokens en un envelope */
   const deposit = useCallback(
     async (id: bigint, amount: bigint) => {
       if (!contract || !address) {
@@ -102,8 +97,11 @@ export function useEnvelopes(contractId: string) {
       console.log("👤 Using user:", address, "for deposit");
       setLoading(true);
       try {
-        const assembled = await contract.deposit({ user: address, id, amount });
-        console.log("📄 XDR before signing:", assembled.result);
+        const assembled = await contract.deposit({
+          user: address,
+          id,
+          amount,
+        });
         const res = await handleTx(assembled);
         const hash = res.sendTransactionResponse?.hash;
         console.log("💰 Deposit successful:", hash);
@@ -148,7 +146,7 @@ export function useEnvelopes(contractId: string) {
     [address, contract, handleTx]
   );
 
-  /** 📊 Obtener balance (view) */
+  /** 📊 Obtener balance */
   const getBalance = useCallback(
     async (id: bigint): Promise<bigint | undefined> => {
       if (!contract || !address) {
@@ -158,9 +156,10 @@ export function useEnvelopes(contractId: string) {
 
       console.log("👤 Using user:", address, "for getBalance");
       try {
-        // Para view functions, obtenemos el resultado de la simulación
-        const assembled = await contract.get_balance({ user: address, id });
-        // El resultado está disponible en assembled.result después de la simulación
+        const assembled = await contract.get_balance({
+          user: address,
+          id,
+        });
         const result = assembled.result;
         console.log("📊 Balance for envelope", id, "is", result);
         return result;
@@ -171,16 +170,16 @@ export function useEnvelopes(contractId: string) {
     [address, contract]
   );
 
-  /** 📜 Listar sobres del usuario (view) */
+  /** 📜 Listar sobres */
   const listEnvelopes = useCallback(async (): Promise<Envelope[]> => {
     if (!contract || !address) {
       console.error("Contract not ready or wallet address missing");
       return [];
     }
     try {
-      // Para view functions, obtenemos el resultado de la simulación
-      const assembled = await contract.list_envelopes({ user: address });
-      // El resultado está disponible en assembled.result después de la simulación
+      const assembled = await contract.list_envelopes({
+        user: address,
+      });
       const result = assembled.result || [];
       console.log("📦 User envelopes:", result);
       return result;

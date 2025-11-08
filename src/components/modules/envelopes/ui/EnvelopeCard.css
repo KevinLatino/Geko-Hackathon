@@ -1,0 +1,116 @@
+.envelope-card-wrapper {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  height: 100%;
+}
+
+.envelope-card-wrapper:hover {
+  transform: translateY(-4px);
+}
+
+.envelope-card-wrapper:hover > * {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.envelope-card-wrapper--selected > * {
+  border: 2px solid #7c3aed;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.envelope-card-wrapper--invalid > * {
+  opacity: 0.7;
+  border: 2px solid #ef4444;
+}
+
+.envelope-card-wrapper--invalid:hover > * {
+  border-color: #dc2626;
+}
+
+.envelope-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.envelope-card__icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.envelope-card__id {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+  background: #f3f4f6;
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.5rem;
+}
+
+.envelope-card__body {
+  margin-bottom: 1rem;
+  min-height: 4rem;
+}
+
+.envelope-card__name {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: #111827;
+}
+
+.envelope-card__description {
+  margin: 0;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.envelope-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.envelope-card__balance {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.envelope-card__balance-label {
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.envelope-card__balance-amount {
+  font-weight: 700;
+  color: #059669;
+  line-height: 1.2;
+}
+
+.envelope-card__token {
+  padding: 0.5rem 1rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.envelope-card__invalid-badge {
+  margin-left: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.envelope-card__invalid-message {
+  margin: 0.5rem 0 0 0;
+  color: #ef4444;
+  font-weight: 500;
+}
+
