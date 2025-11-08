@@ -6,7 +6,7 @@ import { useWallet } from "../hooks/useWallet";
 import { connectWallet } from "../util/wallet";
 
 export default function Home() {
-  const { address } = useWallet();
+const { address } = useWallet();
   const navigate = useNavigate();
 
   const handleGetStarted = async () => {
