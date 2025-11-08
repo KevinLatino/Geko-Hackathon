@@ -1,4 +1,3 @@
-'use client';
 
 import type { ReactNode } from 'react';
 import LiquidEther from '../ui/LiquidEther';
@@ -33,9 +32,9 @@ export function LiquidBackgroundLayout({
 
   return (
     <div
-      className={`relative w-full overflow-hidden bg-background-geko ${className}`}
+      className={`relative w-full overflow-hidden bg-[#0A0A0A] ${className}`}
     >
-      <div className="absolute inset-0">
+      <div className="absolute inset-0 z-0">
         <LiquidEther
           colors={finalConfig.colors}
           mouseForce={finalConfig.mouseForce}
@@ -55,7 +54,9 @@ export function LiquidBackgroundLayout({
           autoWhileHovered={finalConfig.autoWhileHovered}
         />
       </div>
-      {children}
+      <div className="relative z-10">
+        {children}
+      </div>
     </div>
   );
 }
