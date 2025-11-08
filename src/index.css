@@ -560,7 +560,6 @@ th, td {
 .pool-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
 .currency-cards {
@@ -634,7 +633,7 @@ th, td {
   background: #1a1a1a;
   border-radius: 24px;
   padding: 30px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 
 .action-header {
