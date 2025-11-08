@@ -51,15 +51,15 @@ export default function Receive() {
           </div>
 
           {/* QR Code */}
-          <div className="bg-[#0F0F0F] border border-white/10 rounded-3xl p-8 w-full">
-            <div className="bg-[#0F0F0F] rounded-2xl p-6 flex items-center justify-center">
+          <div className="bg-[#202020] border border-white/10 rounded-3xl p-8 w-full">
+            <div className="bg-[#202020] rounded-2xl p-6 flex items-center justify-center">
               <QRCodeSVG
                 value={address}
                 size={256}
                 level="H"
                 includeMargin={false}
                 fgColor="#FFFFFF80"
-                bgColor="#0F0F0F"
+                bgColor="#202020"
                 imageSettings={{
                   src: "/designs/qr-geko.svg",
                   height: 60,

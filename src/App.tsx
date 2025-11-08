@@ -9,6 +9,7 @@ import Pool from "./pages/Pool.tsx";
 import Rewards from "./pages/Rewards.tsx";
 import Analytics from "./pages/Analytics.tsx";
 import Receive from "./pages/Receive.tsx";
+import Send from "./pages/Send.tsx";
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
@@ -42,15 +43,16 @@ function App() {
       {/* Route without navbar */}
       <Route path="/" element={<Home />} />
       
-      {/* Routes with navbar */}
-      <Route element={<AppLayout />}>
-        <Route path="/receive" element={<Receive />} />
-        <Route path="/pool/Test" element={<Pool />} />
-        <Route path="/rewards" element={<Rewards />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/debug" element={<Debugger />} />
-        <Route path="/debug/:contractName" element={<Debugger />} />
-      </Route>
+          {/* Routes with navbar */}
+          <Route element={<AppLayout />}>
+            <Route path="/receive" element={<Receive />} />
+            <Route path="/send" element={<Send />} />
+            <Route path="/pool/Test" element={<Pool />} />
+            <Route path="/rewards" element={<Rewards />} />
+            <Route path="/analytics" element={<Analytics />} />
+            <Route path="/debug" element={<Debugger />} />
+            <Route path="/debug/:contractName" element={<Debugger />} />
+          </Route>
     </Routes>
   );
 }

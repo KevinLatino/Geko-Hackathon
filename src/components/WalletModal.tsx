@@ -1,29 +1,43 @@
-import React, { useState } from "react";
-import { Icon } from "@stellar/design-system";
+import React from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { useTransactions } from "../hooks/useTransactions";
 import { useNavigate } from "react-router-dom";
+import { Send, ArrowDownToLine, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { stellarNetwork } from "../contracts/util";
 
 interface WalletModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type TimeFilter = "Today" | "Week" | "Month";
-
-const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
+const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
   const { address } = useWallet();
   const { xlm } = useWalletBalance();
-  const [activeFilter, setActiveFilter] = useState<TimeFilter>("Month");
+  const { transactions, loading } = useTransactions();
   const navigate = useNavigate();
 
-  // Mock transactions data - replace with real data later
-  const transactions = [
-    { id: 1, name: "Jose Sanchez", amount: "+$30.00", time: "Today - 6:22 AM" },
-    { id: 2, name: "Jose Sanchez", amount: "+$30.00", time: "Today - 6:22 AM" },
-    { id: 3, name: "Jose Sanchez", amount: "+$30.00", time: "Today - 6:22 AM" },
-    { id: 4, name: "Jose Sanchez", amount: "+$30.00", time: "Today - 6:22 AM" },
-  ];
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) {
+      return `Today - ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+    } else if (days === 1) {
+      return `Yesterday - ${date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })}`;
+    } else if (days < 7) {
+      return `${days} days ago`;
+    } else {
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  };
+
+  const handleTransactionClick = (hash: string) => {
+    const networkPath = stellarNetwork.toLowerCase() === "public" ? "public" : "testnet";
+    window.open(`https://stellar.expert/explorer/${networkPath}/tx/${hash}`, '_blank');
+  };
 
   return (
     <>
@@ -40,7 +54,7 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
             <div className="wallet-card-balance">
               <span className="wallet-balance-label">Balance</span>
               <span className="wallet-balance-amount">
-                ${xlm ? parseFloat(xlm).toFixed(2) : "0.00"}
+                ${xlm || "0.00"}
               </span>
             </div>
             <div className="wallet-card-owner">
@@ -54,46 +68,74 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen, onClose }) => {
 
         {/* Send & Receive Buttons */}
         <div className="wallet-actions">
-          <button className="wallet-action-btn">
-            <Icon.Send02 size="lg" />
+          <button 
+            className="wallet-action-btn"
+            onClick={() => navigate("/send")}
+            style={{ backgroundColor: '#FFFFFF0F' }}
+          >
+            <Send size={18} />
             <span>Send</span>
           </button>
           <button 
             className="wallet-action-btn"
             onClick={() => navigate("/receive")}
+            style={{ backgroundColor: '#FFFFFF0F' }}
           >
-            <Icon.Download01 size="lg" />
+            <ArrowDownToLine size={18} />
             <span>Receive</span>
           </button>
         </div>
 
-        {/* Time Filter */}
-        <div className="wallet-filter">
-          {(["Today", "Week", "Month"] as TimeFilter[]).map((filter) => (
-            <button
-              key={filter}
-              className={`wallet-filter-btn ${activeFilter === filter ? "active" : ""}`}
-              onClick={() => setActiveFilter(filter)}
-            >
-              {filter}
-            </button>
-          ))}
+        {/* Transactions Title */}
+        <div className="wallet-transactions-header">
+          <h3 className="text-white text-sm font-semibold">All Transactions</h3>
         </div>
 
         {/* Transactions List */}
         <div className="wallet-transactions">
-          {transactions.map((tx) => (
-            <div key={tx.id} className="wallet-transaction-item">
-              <div className="transaction-icon">
-                <Icon.RefreshCcw01 size="md" />
-              </div>
-              <div className="transaction-info">
-                <div className="transaction-time">{tx.time}</div>
-                <div className="transaction-name">{tx.name}</div>
-              </div>
-              <div className="transaction-amount positive">{tx.amount}</div>
-            </div>
-          ))}
+          {loading ? (
+            <div className="text-white/60 text-sm text-center py-8">Loading transactions...</div>
+          ) : transactions.length === 0 ? (
+            <div className="text-white/60 text-sm text-center py-8">No transactions yet</div>
+          ) : (
+            transactions.map((tx) => {
+              // Safety check
+              if (!tx.hash || !tx.id) return null;
+              
+              return (
+                <div 
+                  key={tx.id} 
+                  className="wallet-transaction-item"
+                  onClick={() => handleTransactionClick(tx.hash)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className="transaction-icon">
+                    {tx.type === "sent" ? (
+                      <ArrowUpRight size={20} className="text-red-500" />
+                    ) : (
+                      <ArrowDownLeft size={20} className="text-green-500" />
+                    )}
+                  </div>
+                  <div className="transaction-info">
+                    <div className="transaction-time">{formatDate(tx.created_at)}</div>
+                    <div className="transaction-name">
+                      {tx.counterparty && tx.counterparty.length >= 8
+                        ? `${tx.counterparty.slice(0, 4)}...${tx.counterparty.slice(-4)}`
+                        : "Unknown"
+                      }
+                    </div>
+                  </div>
+                  <div className={`transaction-amount ${tx.type === "received" ? "positive" : "negative"}`}>
+                    {tx.type === "received" ? "+" : "-"}
+                    {tx.asset_type === "native" 
+                      ? `${parseFloat(tx.amount || "0").toFixed(2)} XLM`
+                      : `$${parseFloat(tx.amount || "0").toFixed(2)}`
+                    }
+                  </div>
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
     </>
