@@ -59,7 +59,7 @@ export const HeaderText: React.FC<HeaderTextProps> = ({
 
       <motion.h2
         className={twMerge(
-          'text-4xl sm:text-5xl md:text-6xl font-semibold text-white max-w-4xl leading-tight',
+          'text-4xl sm:text-5xl md:text-6xl font-medium text-white max-w-3xl leading-tight',
           titleClassName,
           align === 'center'
             ? 'text-center'

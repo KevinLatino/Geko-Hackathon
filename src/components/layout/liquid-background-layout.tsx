@@ -1,7 +1,6 @@
-
-import type { ReactNode } from 'react';
-import LiquidEther from '../ui/LiquidEther';
-import type { LiquidEtherProps } from '../ui/LiquidEther';
+import type { ReactNode } from "react";
+import type { LiquidEtherProps } from "../ui/LiquidEther";
+import LiquidEther from "../ui/LiquidEther";
 
 interface LiquidBackgroundLayoutProps {
   children: ReactNode;
@@ -13,7 +12,7 @@ const DEFAULT_LIQUID_CONFIG: Partial<LiquidEtherProps> = {
   mouseForce: 30,
   cursorSize: 65,
   resolution: 0.5,
-  colors: ['#1FD2FF', '#1A53FF', '#1FC7FF'],
+  colors: ["#1FD2FF", "#1A53FF", "#1FC7FF"],
   autoDemo: true,
   autoSpeed: 0.5,
   autoIntensity: 2.2,
@@ -26,7 +25,7 @@ const DEFAULT_LIQUID_CONFIG: Partial<LiquidEtherProps> = {
 export function LiquidBackgroundLayout({
   children,
   liquidConfig,
-  className = '',
+  className = "",
 }: LiquidBackgroundLayoutProps) {
   const finalConfig = { ...DEFAULT_LIQUID_CONFIG, ...liquidConfig };
 
@@ -54,9 +53,7 @@ export function LiquidBackgroundLayout({
           autoWhileHovered={finalConfig.autoWhileHovered}
         />
       </div>
-      <div className="relative z-10">
-        {children}
-      </div>
+      <div className="relative z-10">{children}</div>
     </div>
   );
 }
