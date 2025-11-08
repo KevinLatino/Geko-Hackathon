@@ -16,12 +16,19 @@ const XLM_ID = (contracts as any).ids?.["XLM"] as string;
 const USDC_ID = (contracts as any).ids?.["USDC"] as string;
 
 async function signAndSubmit(
-  signer: ((xdr: string, opts?: { networkPassphrase?: string; address?: string }) => Promise<{ signedTxXdr: string }>) | undefined,
+  signer:
+    | ((
+        xdr: string,
+        opts?: { networkPassphrase?: string; address?: string }
+      ) => Promise<{ signedTxXdr: string }>)
+    | undefined,
   opXdrBase64: string,
-  address: string,
+  address: string
 ) {
   if (!signer) throw new Error("Wallet not connected");
-  const server = new rpc.Server(rpcUrl, { allowHttp: rpcUrl.startsWith("http://") });
+  const server = new rpc.Server(rpcUrl, {
+    allowHttp: rpcUrl.startsWith("http://"),
+  });
   const userAccount = await server.getAccount(address);
   const txBuilder = new TransactionBuilder(userAccount, {
     fee: "10000",
@@ -34,8 +41,14 @@ async function signAndSubmit(
     throw new Error("Simulation failed");
   }
   const assembled = rpc.assembleTransaction(built, sim).build();
-  const { signedTxXdr } = await signer(assembled.toXDR(), { networkPassphrase, address });
-  const tx = TransactionBuilder.fromXDR(signedTxXdr, networkPassphrase) as Transaction;
+  const { signedTxXdr } = await signer(assembled.toXDR(), {
+    networkPassphrase,
+    address,
+  });
+  const tx = TransactionBuilder.fromXDR(
+    signedTxXdr,
+    networkPassphrase
+  ) as Transaction;
   const sent = await server.sendTransaction(tx);
   if (sent.status !== "PENDING") throw new Error("Failed to send");
   let res = await server.getTransaction(sent.hash);
@@ -53,7 +66,9 @@ const Pool: React.FC = () => {
   const poolAddress = (contracts as any).ids?.[POOL_NAME] ?? "";
   const pool = useMemo(() => new PoolContractV2(poolAddress), [poolAddress]);
 
-  const [selectedCurrency, setSelectedCurrency] = useState<"XLM" | "USDC">("USDC");
+  const [selectedCurrency, setSelectedCurrency] = useState<"XLM" | "USDC">(
+    "USDC"
+  );
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
@@ -63,7 +78,7 @@ const Pool: React.FC = () => {
 
   // Get USDC balance
   const usdcBalance = useMemo(() => {
-    const usdcAsset = balances.find(b => b.asset_code === "USDC");
+    const usdcAsset = balances.find((b: any) => b.asset_code === "USDC");
     return usdcAsset ? parseFloat(usdcAsset.balance).toFixed(2) : "0.00";
   }, [balances]);
 
@@ -73,8 +88,10 @@ const Pool: React.FC = () => {
     try {
       const isXLM = selectedCurrency === "XLM";
       const assetId = isXLM ? XLM_ID : USDC_ID;
-      const requestType = isXLM ? RequestType.SupplyCollateral : RequestType.Supply;
-      
+      const requestType = isXLM
+        ? RequestType.SupplyCollateral
+        : RequestType.Supply;
+
       const op = pool.submit({
         from: address,
         spender: address,
@@ -93,9 +110,8 @@ const Pool: React.FC = () => {
       await updateBalance();
     } catch (error) {
       console.error("Error in handleDeposit:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : JSON.stringify(error, null, 2);
+      const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
       alert(`Error depositing ${selectedCurrency}:\n${errorMessage}`);
     } finally {
       setBusy(null);
@@ -108,7 +124,7 @@ const Pool: React.FC = () => {
     try {
       const isXLM = selectedCurrency === "XLM";
       const assetId = isXLM ? XLM_ID : USDC_ID;
-      
+
       const op = pool.submit({
         from: address,
         spender: address,
@@ -127,15 +143,13 @@ const Pool: React.FC = () => {
       await updateBalance();
     } catch (error) {
       console.error("Error in handleWithdraw:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : JSON.stringify(error, null, 2);
+      const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
       alert(`Error withdrawing ${selectedCurrency}:\n${errorMessage}`);
     } finally {
       setBusy(null);
     }
   };
-
 
   return (
     <div className="pool-container">
@@ -145,37 +159,50 @@ const Pool: React.FC = () => {
           className={`currency-card ${selectedCurrency === "USDC" ? "active" : ""}`}
           onClick={() => setSelectedCurrency("USDC")}
           style={{
-            backgroundImage: selectedCurrency === "USDC" 
-              ? `url(/designs/USDC-FullColor.svg)` 
-              : `url(/designs/USDC-WhiteBlack.svg)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundImage:
+              selectedCurrency === "USDC"
+                ? `url(/designs/USDC-FullColor.svg)`
+                : `url(/designs/USDC-WhiteBlack.svg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         >
           <div className="card-content">
             <span className="invest-label">Invest in</span>
             <span className="currency-name">USDC - USD Coin</span>
-            <span className="wallet-balance">Wallet Balance: {usdcBalance} USDC</span>
+            <span className="wallet-balance">
+              Wallet Balance: {usdcBalance} USDC
+            </span>
           </div>
         </button>
-        
+
         <button
           className={`currency-card ${selectedCurrency === "XLM" ? "active" : ""}`}
           onClick={() => setSelectedCurrency("XLM")}
           style={{
-            backgroundImage: selectedCurrency === "XLM" 
-              ? `url(/designs/Stellar-FullColor.svg)` 
-              : `url(/designs/Stellar-WhiteBlack.svg)`,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundImage:
+              selectedCurrency === "XLM"
+                ? `url(/designs/Stellar-FullColor.svg)`
+                : `url(/designs/Stellar-WhiteBlack.svg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            backgroundRepeat: "no-repeat",
           }}
         >
           <div className="card-content">
             <span className="invest-label">Invest in</span>
             <span className="currency-name">XLM - Stellar</span>
-            <span className="wallet-balance">Wallet Balance: {xlm ? parseFloat(xlm).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '0.00'} XLM</span>
+            <span className="wallet-balance">
+              Wallet Balance:{" "}
+              {xlm
+                ? parseFloat(xlm).toLocaleString("en-US", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
+                : "0.00"}{" "}
+              XLM
+            </span>
           </div>
         </button>
       </div>
@@ -185,13 +212,27 @@ const Pool: React.FC = () => {
         <div className="action-header">
           <div className="action-info">
             <div className="action-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 4V20M12 4L8 8M12 4L16 8" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 4V20M12 4L8 8M12 4L16 8"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
             <div>
               <h3>Please select an amount</h3>
-              <p className="action-description">This is the amount of currency you are investing</p>
+              <p className="action-description">
+                This is the amount of currency you are investing
+              </p>
             </div>
           </div>
           <span className="earnings-badge">+%18 Currently</span>
@@ -204,7 +245,7 @@ const Pool: React.FC = () => {
             onChange={(e) => setDepositAmount(e.target.value)}
             className="amount-input"
           />
-          <button 
+          <button
             className="action-button"
             onClick={handleDeposit}
             disabled={!address || busy === "deposit" || !depositAmount}
@@ -216,8 +257,20 @@ const Pool: React.FC = () => {
 
       {/* Swap Icon */}
       <div className="swap-icon">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M7 10L12 15L17 10M7 6L12 11L17 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 10L12 15L17 10M7 6L12 11L17 6"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
         </svg>
       </div>
 
@@ -226,13 +279,28 @@ const Pool: React.FC = () => {
         <div className="action-header">
           <div className="action-info">
             <div className="action-icon">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 20V4M12 20L8 16M12 20L16 16" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 20V4M12 20L8 16M12 20L16 16"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
               </svg>
             </div>
             <div>
               <h3>Please select an amount</h3>
-              <p className="action-description">This is the amount of currency you are withdrawing from your investment</p>
+              <p className="action-description">
+                This is the amount of currency you are withdrawing from your
+                investment
+              </p>
             </div>
           </div>
           <span className="earnings-badge green">+$1,230.00 Earnings</span>
@@ -245,7 +313,7 @@ const Pool: React.FC = () => {
             onChange={(e) => setWithdrawAmount(e.target.value)}
             className="amount-input"
           />
-          <button 
+          <button
             className="action-button"
             onClick={handleWithdraw}
             disabled={!address || busy === "withdraw" || !withdrawAmount}
@@ -262,8 +330,16 @@ const Pool: React.FC = () => {
         </p>
       )}
       {lastHash && (
-        <p style={{ color: "#4caf50", textAlign: "center", marginTop: "1rem", fontSize: "0.875rem" }}>
-          ✅ Transaction successful: {lastHash.slice(0, 8)}...{lastHash.slice(-8)}
+        <p
+          style={{
+            color: "#4caf50",
+            textAlign: "center",
+            marginTop: "1rem",
+            fontSize: "0.875rem",
+          }}
+        >
+          ✅ Transaction successful: {lastHash.slice(0, 8)}...
+          {lastHash.slice(-8)}
         </p>
       )}
     </div>
