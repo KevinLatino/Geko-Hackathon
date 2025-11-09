@@ -1,0 +1,23 @@
+.create-envelope-form {
+  margin-bottom: 2rem;
+}
+
+.create-envelope-form__header {
+  margin-bottom: 1.5rem;
+}
+
+.create-envelope-form__header h2 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.create-envelope-form__subtitle {
+  margin: 0;
+  color: #6b7280;
+}
+
+.create-envelope-form__form {
+  display: grid;
+  gap: 1rem;
+}
+

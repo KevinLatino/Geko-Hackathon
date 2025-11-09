@@ -1,0 +1,58 @@
+.envelopes-page {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.envelopes-page__header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.envelopes-page__title {
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.envelopes-page__subtitle {
+  margin: 0;
+  color: #6b7280;
+}
+
+.envelopes-page__loading {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.envelopes-page__empty {
+  text-align: center;
+  padding: 4rem 0;
+  color: #6b7280;
+}
+
+.envelopes-page__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 2rem;
+}
+
+.envelopes-page__envelopes {
+  margin-bottom: 2rem;
+}
+
+.envelopes-page__section-title {
+  margin: 0 0 1.5rem 0;
+  font-weight: 600;
+}
+
+.envelopes-page__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .envelopes-page__grid {
+    grid-template-columns: 1fr;
+  }
+}
+

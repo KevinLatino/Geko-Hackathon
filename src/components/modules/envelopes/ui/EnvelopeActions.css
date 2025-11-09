@@ -1,0 +1,58 @@
+.envelope-actions {
+  margin-top: 2rem;
+}
+
+.envelope-actions__header {
+  margin-bottom: 1.5rem;
+}
+
+.envelope-actions__header h3 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.envelope-actions__id {
+  margin: 0;
+  color: #6b7280;
+}
+
+.envelope-actions__empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 2rem 0;
+}
+
+.envelope-actions__form {
+  display: grid;
+  gap: 1rem;
+}
+
+.envelope-actions__buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.envelope-actions__balance {
+  padding: 1rem;
+  background: #f3f4f6;
+  border-radius: 0.5rem;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+.envelope-actions__balance-label {
+  margin: 0 0 0.5rem 0;
+  color: #6b7280;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+.envelope-actions__balance-amount {
+  margin: 0;
+  font-weight: 700;
+  color: #059669;
+}
+
