@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { useTransactions } from "../hooks/useTransactions";
 import { CircleDollarSign, Wallet, FileText, Check, ArrowLeft } from "lucide-react";
 import { Asset, Operation, TransactionBuilder, BASE_FEE, Networks, rpc, Memo } from "@stellar/stellar-sdk";
 import { rpcUrl, stellarNetwork } from "../contracts/util";
@@ -13,6 +14,7 @@ type Currency = "XLM" | "USDC";
 export default function Send() {
   const { address, signTransaction } = useWallet();
   const { xlm, balances, updateBalance } = useWalletBalance();
+  const { refetch: refetchTransactions } = useTransactions();
   const [step, setStep] = useState<Step>(1);
   const [destinationAddress, setDestinationAddress] = useState("");
   const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USDC");
@@ -155,7 +157,18 @@ export default function Send() {
       if (result.status === "PENDING") {
         setTxHash(result.hash);
         setShowSuccessModal(true);
+        
+        // Update balance and transactions
         await updateBalance();
+        await refetchTransactions();
+        setTimeout(() => {
+          updateBalance();
+          refetchTransactions();
+        }, 2000);
+        setTimeout(() => {
+          updateBalance();
+          refetchTransactions();
+        }, 4000);
         
         // Reset form
         setTimeout(() => {

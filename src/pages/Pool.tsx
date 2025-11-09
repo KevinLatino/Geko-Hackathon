@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { useTransactions } from "../hooks/useTransactions";
 import contracts from "../../testnet.contracts.json";
 import { PoolContractV2, RequestType } from "@blend-capital/blend-sdk";
 import {
@@ -63,6 +64,7 @@ async function signAndSubmit(
 const Pool: React.FC = () => {
   const { address, signTransaction, triggerCurrencyChange } = useWallet();
   const { updateBalance } = useWalletBalance();
+  const { refetch: refetchTransactions } = useTransactions();
   const poolAddress = (contracts as any).ids?.[POOL_NAME] ?? "";
   const pool = useMemo(() => new PoolContractV2(poolAddress), [poolAddress]);
 
@@ -114,7 +116,18 @@ const Pool: React.FC = () => {
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
       setDepositAmount("");
+      
+      // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
+      await refetchTransactions();
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 2000);
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 4000);
     } catch (error) {
       console.error("Error in handleDeposit:", error);
       const errorMessage =
@@ -150,7 +163,18 @@ const Pool: React.FC = () => {
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
       setWithdrawAmount("");
+      
+      // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
+      await refetchTransactions();
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 2000);
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 4000);
     } catch (error) {
       console.error("Error in handleWithdraw:", error);
       const errorMessage =
