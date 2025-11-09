@@ -1,11 +1,13 @@
-import { Button, Icon, Layout } from "@stellar/design-system";
+import { useState } from "react";
 import "./App.module.css";
+import Navbar from "./components/Navbar.tsx";
 import ConnectAccount from "./components/ConnectAccount.tsx";
-import { Routes, Route, Outlet, NavLink } from "react-router-dom";
+import { Routes, Route, Outlet } from "react-router-dom";
 import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
 import EnvelopesPage from "./components/modules/envelopes/pages/EnvelopesPage.tsx";
+
 
 const AppLayout: React.FC = () => (
   <main>
@@ -77,16 +79,36 @@ const AppLayout: React.FC = () => (
 );
 
 function App() {
+  const moonPayApiKey =
+    import.meta.env.VITE_MOONPAY_API_KEY ??
+    import.meta.env.PUBLIC_MOONPAY_API_KEY;
+
+  if (!moonPayApiKey) {
+    console.warn("MoonPay API key is missing; rendering app without MoonPay provider.");
+
+    return <AppRoutes />;
+  }
+
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
+    <MoonPayProvider apiKey={moonPayApiKey} debug>
+      <Routes>
+        {/* Route without navbar */}
         <Route path="/" element={<Home />} />
-        <Route path="/pool/Test" element={<Pool />} />
-        <Route path="/debug" element={<Debugger />} />
-        <Route path="/debug/:contractName" element={<Debugger />} />
-        <Route path="/envelopes" element={<EnvelopesPage />} />
-      </Route>
-    </Routes>
+
+        {/* Routes with navbar */}
+        <Route element={<AppLayout />}>
+          <Route path="/receive" element={<Receive />} />
+          <Route path="/send" element={<Send />} />
+          <Route path="/pool/Test" element={<Pool />} />
+          <Route path="/rewards" element={<Rewards />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/moonpay" element={<MoonPayPage />} />
+          <Route path="/envelopes" element={<EnvelopesPage />} />
+          <Route path="/debug" element={<Debugger />} />
+          <Route path="/debug/:contractName" element={<Debugger />} />
+        </Route>
+      </Routes>
+    </MoonPayProvider>
   );
 }
 

@@ -1,7 +1,7 @@
 import React, { useState, useTransition } from "react";
 import { useNotification } from "../hooks/useNotification.ts";
 import { useWallet } from "../hooks/useWallet.ts";
-import { Button, Tooltip } from "@stellar/design-system";
+import { Tooltip } from "@stellar/design-system";
 import { getFriendbotUrl } from "../util/friendbot";
 import { useWalletBalance } from "../hooks/useWalletBalance.ts";
 
@@ -51,14 +51,13 @@ const FundAccountButton: React.FC = () => {
         title="Fund Account"
         placement="bottom"
         triggerEl={
-          <Button
+          <button
             disabled={isPending || isLoading || isFunded}
             onClick={handleFundAccount}
-            variant="primary"
-            size="md"
+            className="px-6 py-3 bg-[#202020] hover:bg-[#2a2a2a] text-white font-medium rounded-full transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Fund Account
-          </Button>
+          </button>
         }
       >
         <div style={{ width: "13em" }}>
