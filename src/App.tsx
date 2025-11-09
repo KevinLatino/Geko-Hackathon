@@ -6,49 +6,76 @@ import { Routes, Route, Outlet } from "react-router-dom";
 import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
-import Rewards from "./pages/Rewards.tsx";
-import Analytics from "./pages/Analytics.tsx";
-import Receive from "./pages/Receive.tsx";
-import Send from "./pages/Send.tsx";
-import MoonPayPage from "./pages/MoonPay.tsx";
-import { MoonPayProvider } from "@moonpay/moonpay-react";
+import EnvelopesPage from "./components/modules/envelopes/pages/EnvelopesPage.tsx";
 
-const AppLayout: React.FC = () => {
-  const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
 
-  return (
-    <div className={`app-layout ${isWalletDrawerOpen ? "drawer-open" : ""}`}>
-      <Navbar 
-        isWalletDrawerOpen={isWalletDrawerOpen}
-        setIsWalletDrawerOpen={setIsWalletDrawerOpen}
-      />
-      <main className="main-content">
-        <div className="top-bar">
-          <div className="top-bar-left">
-            {/* You can add title or breadcrumbs here */}
-          </div>
-          <div className="top-bar-right">
-            <ConnectAccount />
-          </div>
-        </div>
-        <div className="content-wrapper">
-          <Outlet />
-        </div>
-      </main>
-    </div>
-  );
-};
-
-const AppRoutes = () => (
-  <Routes>
-    <Route element={<AppLayout />}>
-      <Route path="/" element={<Home />} />
-      <Route path="/pool/Test" element={<Pool />} />
-      <Route path="/debug" element={<Debugger />} />
-      <Route path="/debug/:contractName" element={<Debugger />} />
-      <Route path="/moonpay" element={<MoonPayPage />} />
-    </Route>
-  </Routes>
+const AppLayout: React.FC = () => (
+  <main>
+    <Layout.Header
+      projectId="My App"
+      projectTitle="My App"
+      contentRight={
+        <>
+          <nav>
+            <NavLink
+              to="/pool/Test"
+              style={{
+                textDecoration: "none",
+              }}
+            >
+              {({ isActive }: { isActive: boolean }) => (
+                <Button variant="tertiary" size="md" disabled={isActive}>
+                  Pool
+                </Button>
+              )}
+            </NavLink>
+            <NavLink
+              to="/envelopes"
+              style={{
+                textDecoration: "none",
+                marginLeft: "0.5rem",
+              }}
+            >
+              {({ isActive }: { isActive: boolean }) => (
+                <Button variant="tertiary" size="md" disabled={isActive}>
+                  Envelopes
+                </Button>
+              )}
+            </NavLink>
+            <NavLink
+              to="/debug"
+              style={{
+                textDecoration: "none",
+                marginLeft: "0.5rem",
+              }}
+            >
+              {({ isActive }: { isActive: boolean }) => (
+                <Button variant="tertiary" size="md" disabled={isActive}>
+                  <Icon.Code02 size="md" />
+                  Debugger
+                </Button>
+              )}
+            </NavLink>
+          </nav>
+          <ConnectAccount />
+        </>
+      }
+    />
+    <Outlet />
+    <Layout.Footer>
+      <span>
+        © {new Date().getFullYear()} My App. Licensed under the{" "}
+        <a
+          href="http://www.apache.org/licenses/LICENSE-2.0"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Apache License, Version 2.0
+        </a>
+        .
+      </span>
+    </Layout.Footer>
+  </main>
 );
 
 function App() {
@@ -76,6 +103,7 @@ function App() {
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/analytics" element={<Analytics />} />
           <Route path="/moonpay" element={<MoonPayPage />} />
+          <Route path="/envelopes" element={<EnvelopesPage />} />
           <Route path="/debug" element={<Debugger />} />
           <Route path="/debug/:contractName" element={<Debugger />} />
         </Route>
