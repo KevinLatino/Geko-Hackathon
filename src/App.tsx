@@ -6,6 +6,7 @@ import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
 import MoonPayRamps from "./components/MoonPayRamps.tsx";
+import { MoonPayProvider } from '@moonpay/moonpay-react';
 import EnvelopesPage from "./pages/Envelopes.tsx";
 
 const AppLayout: React.FC = () => (
@@ -105,17 +106,21 @@ const AppLayout: React.FC = () => (
 );
 
 function App() {
+  const MOONPAY_ENV_API_KEY = import.meta.env.PUBLIC_MOONPAY_API_KEY;
+
   return (
-    <Routes>
-      <Route element={<AppLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/pool/Test" element={<Pool />} />
-        <Route path="/debug" element={<Debugger />} />
-        <Route path="/debug/:contractName" element={<Debugger />} />
-        <Route path="/moonpay" element={<MoonPayRamps />} />
-        <Route path="/envelopes" element={<EnvelopesPage />} />
+    <MoonPayProvider apiKey={MOONPAY_ENV_API_KEY} debug>
+      <Routes>
+        <Route element={<AppLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/pool/Test" element={<Pool />} />
+          <Route path="/debug" element={<Debugger />} />
+          <Route path="/debug/:contractName" element={<Debugger />} />
+          <Route path="/moonpay" element={<MoonPayRamps />} />
+          <Route path="/envelopes" element={<EnvelopesPage />} />
       </Route>
-    </Routes>
+      </Routes>
+    </MoonPayProvider>
   );
 }
 
