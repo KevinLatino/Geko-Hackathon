@@ -6,8 +6,7 @@ import Home from "./pages/Home";
 import Debugger from "./pages/Debugger.tsx";
 import Pool from "./pages/Pool.tsx";
 import MoonPayRamps from "./components/MoonPayRamps.tsx";
-import { MoonPayProvider } from '@moonpay/moonpay-react';
-import EnvelopesPage from "./pages/Envelopes.tsx";
+import { MoonPayProvider } from "@moonpay/moonpay-react";
 
 const AppLayout: React.FC = () => (
   <main>
@@ -105,21 +104,32 @@ const AppLayout: React.FC = () => (
   </main>
 );
 
+const AppRoutes = () => (
+  <Routes>
+    <Route element={<AppLayout />}>
+      <Route path="/" element={<Home />} />
+      <Route path="/pool/Test" element={<Pool />} />
+      <Route path="/debug" element={<Debugger />} />
+      <Route path="/debug/:contractName" element={<Debugger />} />
+      <Route path="/moonpay" element={<MoonPayRamps />} />
+    </Route>
+  </Routes>
+);
+
 function App() {
-  const MOONPAY_ENV_API_KEY = import.meta.env.PUBLIC_MOONPAY_API_KEY;
+  const moonPayApiKey =
+    import.meta.env.VITE_MOONPAY_API_KEY ??
+    import.meta.env.PUBLIC_MOONPAY_API_KEY;
+
+  if (!moonPayApiKey) {
+    console.warn("MoonPay API key is missing; rendering app without MoonPay provider.");
+
+    return <AppRoutes />;
+  }
 
   return (
-    <MoonPayProvider apiKey={MOONPAY_ENV_API_KEY} debug>
-      <Routes>
-        <Route element={<AppLayout />}>
-          <Route path="/" element={<Home />} />
-          <Route path="/pool/Test" element={<Pool />} />
-          <Route path="/debug" element={<Debugger />} />
-          <Route path="/debug/:contractName" element={<Debugger />} />
-          <Route path="/moonpay" element={<MoonPayRamps />} />
-          <Route path="/envelopes" element={<EnvelopesPage />} />
-      </Route>
-      </Routes>
+    <MoonPayProvider apiKey={moonPayApiKey} debug>
+      <AppRoutes />
     </MoonPayProvider>
   );
 }
