@@ -10,8 +10,8 @@ import Rewards from "./pages/Rewards.tsx";
 import Analytics from "./pages/Analytics.tsx";
 import Receive from "./pages/Receive.tsx";
 import Send from "./pages/Send.tsx";
-import MoonPayRamps from "./components/MoonPayRamps.tsx";
-
+import MoonPayPage from "./pages/MoonPay.tsx";
+import { MoonPayProvider } from "@moonpay/moonpay-react";
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
@@ -46,7 +46,7 @@ const AppRoutes = () => (
       <Route path="/pool/Test" element={<Pool />} />
       <Route path="/debug" element={<Debugger />} />
       <Route path="/debug/:contractName" element={<Debugger />} />
-      <Route path="/moonpay" element={<MoonPayRamps />} />
+      <Route path="/moonpay" element={<MoonPayPage />} />
     </Route>
   </Routes>
 );
@@ -75,9 +75,9 @@ function App() {
           <Route path="/pool/Test" element={<Pool />} />
           <Route path="/rewards" element={<Rewards />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/moonpay" element={<MoonPayPage />} />
           <Route path="/debug" element={<Debugger />} />
           <Route path="/debug/:contractName" element={<Debugger />} />
-          <Route path="/moonpay" element={<MoonPayRamps />} />
         </Route>
       </Routes>
     </MoonPayProvider>

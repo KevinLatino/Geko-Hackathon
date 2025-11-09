@@ -24,6 +24,11 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
       label: "Pool",
     },
     {
+      path: "/moonpay",
+      icon: <Icon.CoinsStacked02 size="lg" />,
+      label: "Buy Crypto",
+    },
+    {
       path: "/rewards",
       icon: <Icon.Stars02 size="lg" />,
       label: "Rewards",
