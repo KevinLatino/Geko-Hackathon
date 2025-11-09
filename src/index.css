@@ -816,19 +816,187 @@ th, td {
   box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3);
 }
 
+/* Mobile Header - Hidden on Desktop */
+.mobile-header {
+  display: none;
+}
+
+.navbar-item-label {
+  display: none;
+}
+
+/* Desktop Only - Hidden on Mobile */
+.desktop-only {
+  display: flex;
+}
+
 /* Responsive */
-@media (max-width: 768px) {
+@media (max-width: 1024px) {
+  /* Mobile Header */
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+    background: #141414;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 0 16px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1001;
+  }
+
+  .mobile-menu-btn,
+  .mobile-wallet-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-menu-btn:hover,
+  .mobile-wallet-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+
+  .mobile-header-title {
+    color: white;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  /* Mobile Menu Overlay */
+  .mobile-menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 999;
+    animation: fadeIn 0.3s ease;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* Hide desktop only elements */
+  .desktop-only {
+    display: none !important;
+  }
+
+  /* Navbar as Mobile Menu */
+  .navbar-container {
+    position: fixed;
+    left: -280px;
+    top: 60px;
+    bottom: 0;
+    width: 280px;
+    background: #141414;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 1000;
+    transition: left 0.3s ease;
+    padding: 20px;
+  }
+
+  .navbar-container.mobile-menu-open {
+    left: 0;
+  }
+
+  .navbar-items {
+    gap: 8px;
+  }
+
+  .navbar-item {
+    width: 100%;
+    height: 48px;
+    justify-content: flex-start;
+    padding: 0 16px;
+    gap: 12px;
+  }
+
+  .navbar-item-label {
+    display: block;
+    color: white;
+    font-size: 15px;
+    font-weight: 500;
+  }
+
+  /* Main Content - No margin on mobile */
+  .main-content {
+    margin-left: 0 !important;
+    padding-top: 60px;
+  }
+
+  .app-layout.drawer-open .main-content {
+    margin-left: 0 !important;
+  }
+
+  .content-wrapper {
+    padding: 16px;
+  }
+
+  /* Top Bar - Hide on mobile (replaced by mobile header) */
+  .top-bar {
+    display: none;
+  }
+
+  /* Wallet Modal - Full screen on mobile */
+  .wallet-modal {
+    position: fixed;
+    left: auto;
+    right: -100%;
+    top: 60px;
+    width: 100%;
+    height: calc(100vh - 60px);
+    border-radius: 0;
+    border-right: none;
+    transition: right 0.3s ease-in-out;
+    z-index: 998;
+  }
+
+  .wallet-modal.open {
+    right: 0;
+  }
+
+  .wallet-card-container {
+    max-width: 100%;
+  }
+
+  /* Pool Page */
   .currency-cards {
     grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .currency-card {
+    min-height: 200px;
   }
 
   .action-header {
     flex-direction: column;
     align-items: flex-start;
+    gap: 12px;
   }
 
   .action-input-row {
     flex-direction: column;
+    width: 100%;
   }
 
   .action-button {
@@ -838,5 +1006,36 @@ th, td {
   .currency-icon {
     width: 100px;
     height: 100px;
+  }
+
+  .pool-container {
+    padding: 16px !important;
+  }
+
+  /* Wallet Modal Actions */
+  .wallet-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .wallet-action-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Send/Receive Pages */
+  .qr-container {
+    max-width: 100%;
+  }
+
+  .send-container,
+  .receive-container {
+    max-width: 100%;
+    padding: 20px;
+  }
+
+  /* Landing Page */
+  .landing-header {
+    padding: 0 20px;
   }
 }

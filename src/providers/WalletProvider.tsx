@@ -1,5 +1,6 @@
 import {
   createContext,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -9,15 +10,22 @@ import {
 import { wallet } from "../util/wallet";
 import storage from "../util/storage";
 
-export interface WalletContextType {
+interface WalletState {
   address?: string;
   network?: string;
   networkPassphrase?: string;
-  isPending: boolean;
-  signTransaction?: typeof wallet.signTransaction;
 }
 
-const initialState = {
+export interface WalletContextType extends WalletState {
+  isPending: boolean;
+  signTransaction?: typeof wallet.signTransaction;
+  currencyView: "XLM" | "USD";
+  setCurrencyView: (view: "XLM" | "USD") => void;
+  triggerCurrencyChange: (view: "XLM" | "USD") => void;
+  pendingCurrencyChange: "XLM" | "USD" | null;
+}
+
+const initialState: WalletState = {
   address: undefined,
   network: undefined,
   networkPassphrase: undefined,
@@ -26,33 +34,44 @@ const initialState = {
 const POLL_INTERVAL = 1000;
 
 export const WalletContext = // eslint-disable-line react-refresh/only-export-components
-  createContext<WalletContextType>({ isPending: true });
+  createContext<WalletContextType>({ 
+    isPending: true, 
+    currencyView: "XLM", 
+    setCurrencyView: () => {},
+    triggerCurrencyChange: () => {},
+    pendingCurrencyChange: null
+  });
 
 export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, setState] =
-    useState<Omit<WalletContextType, "isPending">>(initialState);
+  const [state, setState] = useState<WalletState>(initialState);
   const [isPending, startTransition] = useTransition();
   const popupLock = useRef(false);
+  const [currencyView, setCurrencyView] = useState<"XLM" | "USD">("XLM");
+  const [pendingCurrencyChange, setPendingCurrencyChange] = useState<"XLM" | "USD" | null>(null);
+  
+  // Function to trigger an animated currency change
+  const triggerCurrencyChange = useCallback((view: "XLM" | "USD") => {
+    if (view !== currencyView) {
+      setPendingCurrencyChange(view);
+      // The actual change will happen after 300ms (handled by WalletModal)
+      setTimeout(() => {
+        setCurrencyView(view);
+        setPendingCurrencyChange(null);
+      }, 300);
+    }
+  }, [currencyView]);
   
   // Create a wrapper function that ensures wallet is set before signing
-  const signTransaction = async (xdr: string, opts?: { networkPassphrase?: string; address?: string }) => {
+  const signTransaction = useCallback(async (xdr: string, opts?: { networkPassphrase?: string; address?: string }) => {
     const walletId = storage.getItem("walletId");
     if (walletId) {
       wallet.setWallet(walletId);
     }
     return wallet.signTransaction(xdr, opts);
-  };
+  }, []);
 
-  const nullify = () => {
-    updateState(initialState);
-    storage.setItem("walletId", "");
-    storage.setItem("walletAddress", "");
-    storage.setItem("walletNetwork", "");
-    storage.setItem("networkPassphrase", "");
-  };
-
-  const updateState = (newState: Omit<WalletContextType, "isPending">) => {
-    setState((prev: Omit<WalletContextType, "isPending">) => {
+  const updateState = useCallback((newState: WalletState) => {
+    setState((prev: WalletState) => {
       if (
         prev.address !== newState.address ||
         prev.network !== newState.network ||
@@ -62,9 +81,17 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       }
       return prev;
     });
-  };
+  }, []);
 
-  const updateCurrentWalletState = async () => {
+  const nullify = useCallback(() => {
+    updateState(initialState);
+    storage.setItem("walletId", "");
+    storage.setItem("walletAddress", "");
+    storage.setItem("walletNetwork", "");
+    storage.setItem("networkPassphrase", "");
+  }, [updateState]);
+
+  const updateCurrentWalletState = useCallback(async () => {
     // There is no way, with StellarWalletsKit, to check if the wallet is
     // installed/connected/authorized. We need to manage that on our side by
     // checking our storage item.
@@ -131,7 +158,7 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
           storage.setItem("walletAddress", a.address);
           storage.setItem("walletNetwork", n.network);
           storage.setItem("networkPassphrase", n.networkPassphrase);
-          updateState({ ...a, ...n });
+          updateState({ address: a.address, network: n.network, networkPassphrase: n.networkPassphrase });
         }
       } catch (e) {
         // If there's an error, don't immediately disconnect
@@ -141,27 +168,11 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
         popupLock.current = false;
       }
     }
-  };
+  }, [state.address, nullify, updateState]);
 
   useEffect(() => {
     let timer: NodeJS.Timeout;
     let isMounted = true;
-
-    // Load wallet from localStorage immediately on mount
-    const initializeWallet = () => {
-      const walletAddr = storage.getItem("walletAddress");
-      const walletNetwork = storage.getItem("walletNetwork");
-      const passphrase = storage.getItem("networkPassphrase");
-
-      // If we have stored wallet data, restore it immediately
-      if (walletAddr && walletNetwork && passphrase) {
-        updateState({
-          address: walletAddr,
-          network: walletNetwork,
-          networkPassphrase: passphrase,
-        });
-      }
-    };
 
     // Create recursive polling function to check wallet state continuously
     const pollWalletState = async () => {
@@ -173,9 +184,6 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
         timer = setTimeout(() => void pollWalletState(), POLL_INTERVAL);
       }
     };
-
-    // Initialize wallet state immediately from localStorage
-    initializeWallet();
 
     // Get the wallet address when the component is mounted for the first time
     startTransition(async () => {
@@ -200,8 +208,12 @@ export const WalletProvider = ({ children }: { children: React.ReactNode }) => {
       ...state,
       isPending,
       signTransaction,
+      currencyView,
+      setCurrencyView,
+      triggerCurrencyChange,
+      pendingCurrencyChange,
     }),
-    [state, isPending, signTransaction],
+    [state, isPending, signTransaction, currencyView, pendingCurrencyChange],
   );
 
   return <WalletContext value={contextValue}>{children}</WalletContext>;

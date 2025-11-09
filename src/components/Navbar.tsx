@@ -1,8 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { Icon } from "@stellar/design-system";
 import WalletModal from "./WalletModal";
-import { ChevronsRight, ChevronsLeft } from 'lucide-react';
+import { ChevronsRight, ChevronsLeft, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   isWalletDrawerOpen: boolean;
@@ -10,6 +10,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOpen }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
     {
@@ -34,11 +35,44 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
     }
   ];
 
+  const handleNavClick = () => {
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <>
-      <nav className="navbar-container">
-        {/* Logo - Opens Wallet Modal */}
-        <div className="navbar-logo">
+      {/* Mobile Header */}
+      <div className="mobile-header">
+        <button
+          className="mobile-menu-btn"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+        
+        <div className="mobile-header-title">Geko</div>
+        
+        <button
+          className="mobile-wallet-btn"
+          onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
+        >
+          {isWalletDrawerOpen ? (
+            <ChevronsLeft size={20} />
+          ) : (
+            <ChevronsRight size={20} />
+          )}
+        </button>
+      </div>
+
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+      )}
+
+      {/* Desktop Navbar / Mobile Menu */}
+      <nav className={`navbar-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
+        {/* Logo - Opens Wallet Modal (Desktop only) */}
+        <div className="navbar-logo desktop-only">
           <button
             className="logo-icon"
             onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
@@ -53,7 +87,7 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
         </div>
 
         {/* Divider */}
-        <div className="navbar-divider" />
+        <div className="navbar-divider desktop-only" />
 
         {/* Navigation Items */}
         <div className="navbar-items">
@@ -65,8 +99,10 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
                 `navbar-item ${isActive ? "navbar-item-active" : ""}`
               }
               title={item.label}
+              onClick={handleNavClick}
             >
               {item.icon}
+              <span className="navbar-item-label">{item.label}</span>
             </NavLink>
           ))}
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { useTransactions } from "../hooks/useTransactions";
@@ -11,14 +11,11 @@ interface WalletModalProps {
   onClose: () => void;
 }
 
-type CurrencyView = "XLM" | "USD";
-
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
-  const { address } = useWallet();
+  const { address, currencyView, setCurrencyView, pendingCurrencyChange } = useWallet();
   const { xlm, balances } = useWalletBalance();
   const { transactions, loading } = useTransactions();
   const navigate = useNavigate();
-  const [currencyView, setCurrencyView] = useState<CurrencyView>("XLM");
   const [isFlipping, setIsFlipping] = useState(false);
 
   // Calculate total balance in USD
@@ -27,11 +24,21 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
   );
   const totalUSD = (parseFloat(xlm || "0") * 0.1) + parseFloat(usdcBalance?.balance || "0"); // Assuming XLM = $0.10 for demo
 
+  // Trigger flip animation when pendingCurrencyChange is set (from Pool page)
+  useEffect(() => {
+    if (pendingCurrencyChange !== null) {
+      setIsFlipping(true);
+      setTimeout(() => {
+        setIsFlipping(false);
+      }, 600);
+    }
+  }, [pendingCurrencyChange]);
+
   const handleCurrencySwitch = () => {
     setIsFlipping(true);
     
     setTimeout(() => {
-      setCurrencyView(prev => prev === "XLM" ? "USD" : "XLM");
+      setCurrencyView(currencyView === "XLM" ? "USD" : "XLM");
     }, 300); // Switch content when opacity is 0 (middle of flip)
     
     setTimeout(() => {

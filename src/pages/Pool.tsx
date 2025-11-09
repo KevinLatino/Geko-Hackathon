@@ -61,13 +61,13 @@ async function signAndSubmit(
 }
 
 const Pool: React.FC = () => {
-  const { address, signTransaction } = useWallet();
-  const { updateBalance, xlm, balances } = useWalletBalance();
+  const { address, signTransaction, triggerCurrencyChange } = useWallet();
+  const { updateBalance } = useWalletBalance();
   const poolAddress = (contracts as any).ids?.[POOL_NAME] ?? "";
   const pool = useMemo(() => new PoolContractV2(poolAddress), [poolAddress]);
 
   const [selectedCurrency, setSelectedCurrency] = useState<"XLM" | "USDC">(
-    "USDC"
+    "XLM"
   );
   const [depositAmount, setDepositAmount] = useState("");
   const [withdrawAmount, setWithdrawAmount] = useState("");
@@ -76,11 +76,18 @@ const Pool: React.FC = () => {
 
   const toFixed7 = (v: string) => BigInt(Math.round(Number(v) * 1e7));
 
-  // Get USDC balance
-  const usdcBalance = useMemo(() => {
-    const usdcAsset = balances.find((b: any) => b.asset_code === "USDC");
-    return usdcAsset ? parseFloat(usdcAsset.balance).toFixed(2) : "0.00";
-  }, [balances]);
+  const handleCurrencySelect = (currency: "XLM" | "USDC") => {
+    if (currency === selectedCurrency) return;
+    
+    setSelectedCurrency(currency);
+    
+    // Trigger animated currency change in wallet card
+    if (currency === "USDC") {
+      triggerCurrencyChange("USD");
+    } else {
+      triggerCurrencyChange("XLM");
+    }
+  };
 
   const handleDeposit = async () => {
     if (!address || !depositAmount) return;
@@ -156,30 +163,8 @@ const Pool: React.FC = () => {
       {/* Currency Selection Cards */}
       <div className="currency-cards ">
         <button
-          className={`currency-card ${selectedCurrency === "USDC" ? "active" : ""}`}
-          onClick={() => setSelectedCurrency("USDC")}
-          style={{
-            backgroundImage:
-              selectedCurrency === "USDC"
-                ? `url(/designs/USDC-FullColor.svg)`
-                : `url(/designs/USDC-WhiteBlack.svg)`,
-            backgroundSize: "cover",
-            backgroundPosition: "center bottom -10px",
-            backgroundRepeat: "no-repeat",
-          }}
-        >
-          <div className="card-content">
-            <span className="invest-label">Invest in</span>
-            <span className="currency-name">USDC - USD Coin</span>
-            <span className="wallet-balance">
-              Wallet Balance: {usdcBalance} USDC
-            </span>
-          </div>
-        </button>
-
-        <button
           className={`currency-card ${selectedCurrency === "XLM" ? "active" : ""}`}
-          onClick={() => setSelectedCurrency("XLM")}
+          onClick={() => handleCurrencySelect("XLM")}
           style={{
             backgroundImage:
               selectedCurrency === "XLM"
@@ -193,16 +178,25 @@ const Pool: React.FC = () => {
           <div className="card-content">
             <span className="invest-label">Invest in</span>
             <span className="currency-name">XLM - Stellar</span>
-            <span className="wallet-balance">
-              Wallet Balance:{" "}
-              {xlm
-                ? parseFloat(xlm).toLocaleString("en-US", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })
-                : "0.00"}{" "}
-              XLM
-            </span>
+          </div>
+        </button>
+
+        <button
+          className={`currency-card ${selectedCurrency === "USDC" ? "active" : ""}`}
+          onClick={() => handleCurrencySelect("USDC")}
+          style={{
+            backgroundImage:
+              selectedCurrency === "USDC"
+                ? `url(/designs/USDC-FullColor.svg)`
+                : `url(/designs/USDC-WhiteBlack.svg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom -10px",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <div className="card-content">
+            <span className="invest-label">Invest in</span>
+            <span className="currency-name">USDC - USD Coin</span>
           </div>
         </button>
       </div>
