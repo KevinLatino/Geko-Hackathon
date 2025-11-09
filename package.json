@@ -18,8 +18,7 @@
     "pool:distribute": "tsx src/blend/pool/distribute.ts",
     "pool:revoke-admin": "tsx src/blend/pool/revoke-admin.ts",
     "pool:verify": "tsx src/blend/pool/verify-pool.ts",
-    "admin:generate": "tsx src/blend/utils/generate-admin-key.ts",
-    "admin:from-mnemonic": "tsx src/blend/utils/mnemonic-to-key.ts"
+    "token:deploy": "tsx src/geko-token/deploy-token.ts"
   },
   "workspaces": [
     "packages/*"
