@@ -131,6 +131,9 @@ const Pool: React.FC = () => {
     try {
       const isXLM = selectedCurrency === "XLM";
       const assetId = isXLM ? XLM_ID : USDC_ID;
+      const requestType = isXLM
+        ? RequestType.WithdrawCollateral
+        : RequestType.Withdraw;
 
       const op = pool.submit({
         from: address,
@@ -140,7 +143,7 @@ const Pool: React.FC = () => {
           {
             address: assetId,
             amount: toFixed7(withdrawAmount),
-            request_type: RequestType.WithdrawCollateral,
+            request_type: requestType,
           },
         ],
       });

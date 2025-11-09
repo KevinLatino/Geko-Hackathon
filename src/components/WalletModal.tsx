@@ -3,7 +3,7 @@ import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { useTransactions } from "../hooks/useTransactions";
 import { useNavigate } from "react-router-dom";
-import { Send, ArrowDownToLine, ArrowUpRight, ArrowDownLeft, RefreshCw } from 'lucide-react';
+import { Send, ArrowDownToLine, ArrowUpRight, ArrowDownLeft, RefreshCw, TrendingUp, TrendingDown } from 'lucide-react';
 import { stellarNetwork } from "../contracts/util";
 
 interface WalletModalProps {
@@ -145,6 +145,50 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
               // Safety check
               if (!tx.hash || !tx.id) return null;
               
+              // Determine icon and color based on transaction type
+              const getTransactionIcon = () => {
+                switch (tx.type) {
+                  case "sent":
+                    return <ArrowUpRight size={20} className="text-red-500" />;
+                  case "received":
+                    return <ArrowDownLeft size={20} className="text-green-500" />;
+                  case "deposit":
+                    // Deposit = money OUT = red
+                    return <TrendingUp size={20} className="text-red-500" />;
+                  case "withdraw":
+                    // Withdraw = money IN = green
+                    return <TrendingDown size={20} className="text-green-500" />;
+                  default:
+                    return <ArrowUpRight size={20} className="text-gray-400" />;
+                }
+              };
+
+              const getAmountPrefix = () => {
+                // Withdraw and received = money coming IN (+)
+                // Deposit and sent = money going OUT (-)
+                if (tx.type === "received" || tx.type === "withdraw") return "+";
+                return "-";
+              };
+
+              const getAmountColor = () => {
+                // Withdraw and received = money coming IN (green/positive)
+                // Deposit and sent = money going OUT (red/negative)
+                if (tx.type === "received" || tx.type === "withdraw") return "positive";
+                return "negative";
+              };
+
+              // Format amount with proper asset display
+              const formatAmount = () => {
+                const amount = parseFloat(tx.amount || "0").toFixed(2);
+                if (tx.asset_type === "native") {
+                  return `${amount} XLM`;
+                } else {
+                  // Show asset_code if available, otherwise default to USDC
+                  const assetCode = tx.asset_code || "USDC";
+                  return `${amount} ${assetCode}`;
+                }
+              };
+              
               return (
                 <div 
                   key={tx.id} 
@@ -153,27 +197,37 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
                   style={{ cursor: 'pointer' }}
                 >
                   <div className="transaction-icon">
-                    {tx.type === "sent" ? (
-                      <ArrowUpRight size={20} className="text-red-500" />
-                    ) : (
-                      <ArrowDownLeft size={20} className="text-green-500" />
-                    )}
+                    {getTransactionIcon()}
                   </div>
                   <div className="transaction-info">
                     <div className="transaction-time">{formatDate(tx.created_at)}</div>
                     <div className="transaction-name">
-                      {tx.counterparty && tx.counterparty.length >= 8
-                        ? `${tx.counterparty.slice(0, 4)}...${tx.counterparty.slice(-4)}`
-                        : "Unknown"
-                      }
+                      {tx.category === "investment" ? (
+                        // For investment transactions, show the label prominently
+                        <div className="flex flex-col gap-1">
+                          <span className="text-white font-medium text-sm">{tx.label}</span>
+                          <span className="text-white/50 text-xs">Pool Contract</span>
+                        </div>
+                      ) : (
+                        // For regular transactions, show counterparty
+                        <div className="flex flex-col gap-1">
+                          <span className="text-white font-medium text-sm">
+                            {tx.type === "sent" ? "Sent to" : "Received from"}
+                          </span>
+                          <span className="text-white/70 text-xs">
+                            {tx.counterparty && tx.counterparty.length >= 8
+                              ? `${tx.counterparty.slice(0, 6)}...${tx.counterparty.slice(-4)}`
+                              : tx.counterparty || "Unknown"
+                            }
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                  <div className={`transaction-amount ${tx.type === "received" ? "positive" : "negative"}`}>
-                    {tx.type === "received" ? "+" : "-"}
-                    {tx.asset_type === "native" 
-                      ? `${parseFloat(tx.amount || "0").toFixed(2)} XLM`
-                      : `$${parseFloat(tx.amount || "0").toFixed(2)}`
-                    }
+                  <div className={`transaction-amount ${getAmountColor()}`}>
+                    <span style={{ fontSize: '14px', fontWeight: '600' }}>
+                      {getAmountPrefix()}{formatAmount()}
+                    </span>
                   </div>
                 </div>
               );
