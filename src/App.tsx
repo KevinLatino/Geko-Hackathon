@@ -10,6 +10,8 @@ import Rewards from "./pages/Rewards.tsx";
 import Analytics from "./pages/Analytics.tsx";
 import Receive from "./pages/Receive.tsx";
 import Send from "./pages/Send.tsx";
+import MoonPayRamps from "./components/MoonPayRamps.tsx";
+
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
@@ -37,23 +39,48 @@ const AppLayout: React.FC = () => {
   );
 };
 
-function App() {
-  return (
-    <Routes>
-      {/* Route without navbar */}
+const AppRoutes = () => (
+  <Routes>
+    <Route element={<AppLayout />}>
       <Route path="/" element={<Home />} />
-      
-          {/* Routes with navbar */}
-          <Route element={<AppLayout />}>
-            <Route path="/receive" element={<Receive />} />
-            <Route path="/send" element={<Send />} />
-            <Route path="/pool/Test" element={<Pool />} />
-            <Route path="/rewards" element={<Rewards />} />
-            <Route path="/analytics" element={<Analytics />} />
-            <Route path="/debug" element={<Debugger />} />
-            <Route path="/debug/:contractName" element={<Debugger />} />
-          </Route>
-    </Routes>
+      <Route path="/pool/Test" element={<Pool />} />
+      <Route path="/debug" element={<Debugger />} />
+      <Route path="/debug/:contractName" element={<Debugger />} />
+      <Route path="/moonpay" element={<MoonPayRamps />} />
+    </Route>
+  </Routes>
+);
+
+function App() {
+  const moonPayApiKey =
+    import.meta.env.VITE_MOONPAY_API_KEY ??
+    import.meta.env.PUBLIC_MOONPAY_API_KEY;
+
+  if (!moonPayApiKey) {
+    console.warn("MoonPay API key is missing; rendering app without MoonPay provider.");
+
+    return <AppRoutes />;
+  }
+
+  return (
+    <MoonPayProvider apiKey={moonPayApiKey} debug>
+      <Routes>
+        {/* Route without navbar */}
+        <Route path="/" element={<Home />} />
+
+        {/* Routes with navbar */}
+        <Route element={<AppLayout />}>
+          <Route path="/receive" element={<Receive />} />
+          <Route path="/send" element={<Send />} />
+          <Route path="/pool/Test" element={<Pool />} />
+          <Route path="/rewards" element={<Rewards />} />
+          <Route path="/analytics" element={<Analytics />} />
+          <Route path="/debug" element={<Debugger />} />
+          <Route path="/debug/:contractName" element={<Debugger />} />
+          <Route path="/moonpay" element={<MoonPayRamps />} />
+        </Route>
+      </Routes>
+    </MoonPayProvider>
   );
 }
 
