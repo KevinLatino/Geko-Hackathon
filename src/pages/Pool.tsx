@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { Layout, Card, Button, Input } from "@stellar/design-system";
-import { Box } from "../components/layout/Box.tsx";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
+import { useTransactions } from "../hooks/useTransactions";
 import contracts from "../../testnet.contracts.json";
 import { PoolContractV2, RequestType } from "@blend-capital/blend-sdk";
 import {
@@ -17,19 +16,20 @@ const POOL_NAME = "Test";
 const XLM_ID = (contracts as any).ids?.["XLM"] as string;
 const USDC_ID = (contracts as any).ids?.["USDC"] as string;
 
-const formatBalanceLine = (b: any) => {
-  if (b.asset_type === "native") return "XLM";
-  if (b.asset_type?.startsWith("credit_")) return `${b.asset_code}:${b.asset_issuer}`;
-  return b.asset_type ?? "UNKNOWN";
-};
-
 async function signAndSubmit(
-  signer: ((xdr: string, opts?: { networkPassphrase?: string; address?: string }) => Promise<{ signedTxXdr: string }>) | undefined,
+  signer:
+    | ((
+        xdr: string,
+        opts?: { networkPassphrase?: string; address?: string }
+      ) => Promise<{ signedTxXdr: string }>)
+    | undefined,
   opXdrBase64: string,
-  address: string,
+  address: string
 ) {
   if (!signer) throw new Error("Wallet not connected");
-  const server = new rpc.Server(rpcUrl, { allowHttp: rpcUrl.startsWith("http://") });
+  const server = new rpc.Server(rpcUrl, {
+    allowHttp: rpcUrl.startsWith("http://"),
+  });
   const userAccount = await server.getAccount(address);
   const txBuilder = new TransactionBuilder(userAccount, {
     fee: "10000",
@@ -42,8 +42,14 @@ async function signAndSubmit(
     throw new Error("Simulation failed");
   }
   const assembled = rpc.assembleTransaction(built, sim).build();
-  const { signedTxXdr } = await signer(assembled.toXDR(), { networkPassphrase, address });
-  const tx = TransactionBuilder.fromXDR(signedTxXdr, networkPassphrase) as Transaction;
+  const { signedTxXdr } = await signer(assembled.toXDR(), {
+    networkPassphrase,
+    address,
+  });
+  const tx = TransactionBuilder.fromXDR(
+    signedTxXdr,
+    networkPassphrase
+  ) as Transaction;
   const sent = await server.sendTransaction(tx);
   if (sent.status !== "PENDING") throw new Error("Failed to send");
   let res = await server.getTransaction(sent.hash);
@@ -56,190 +62,308 @@ async function signAndSubmit(
 }
 
 const Pool: React.FC = () => {
-  const { address, signTransaction } = useWallet();
-  const { balances, xlm, isFunded, isLoading, error, updateBalance } = useWalletBalance();
+  const { address, signTransaction, triggerCurrencyChange } = useWallet();
+  const { updateBalance } = useWalletBalance();
+  const { refetch: refetchTransactions } = useTransactions();
   const poolAddress = (contracts as any).ids?.[POOL_NAME] ?? "";
   const pool = useMemo(() => new PoolContractV2(poolAddress), [poolAddress]);
 
-  const [amountXlm, setAmountXlm] = useState("");
-  const [amountUsdc, setAmountUsdc] = useState("");
+  const [selectedCurrency, setSelectedCurrency] = useState<"XLM" | "USDC">(
+    "XLM"
+  );
+  const [depositAmount, setDepositAmount] = useState("");
+  const [withdrawAmount, setWithdrawAmount] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [lastHash, setLastHash] = useState<string | null>(null);
-  const [wAmountXlm, setWAmountXlm] = useState("");
-  const [wAmountUsdc, setWAmountUsdc] = useState("");
 
   const toFixed7 = (v: string) => BigInt(Math.round(Number(v) * 1e7));
 
-  const handleDepositXlm = async () => {
-    if (!address) return;
-    setBusy("deposit-xlm");
+  const handleCurrencySelect = (currency: "XLM" | "USDC") => {
+    if (currency === selectedCurrency) return;
+    
+    setSelectedCurrency(currency);
+    
+    // Trigger animated currency change in wallet card
+    if (currency === "USDC") {
+      triggerCurrencyChange("USD");
+    } else {
+      triggerCurrencyChange("XLM");
+    }
+  };
+
+  const handleDeposit = async () => {
+    if (!address || !depositAmount) return;
+    setBusy("deposit");
     try {
+      const isXLM = selectedCurrency === "XLM";
+      const assetId = isXLM ? XLM_ID : USDC_ID;
+      const requestType = isXLM
+        ? RequestType.SupplyCollateral
+        : RequestType.Supply;
+
       const op = pool.submit({
         from: address,
         spender: address,
         to: address,
         requests: [
           {
-            address: XLM_ID,
-            amount: toFixed7(amountXlm),
-            request_type: RequestType.SupplyCollateral,
+            address: assetId,
+            amount: toFixed7(depositAmount),
+            request_type: requestType,
           },
         ],
       });
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
+      setDepositAmount("");
+      
+      // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
+      await refetchTransactions();
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 2000);
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 4000);
+    } catch (error) {
+      console.error("Error in handleDeposit:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
+      alert(`Error depositing ${selectedCurrency}:\n${errorMessage}`);
     } finally {
       setBusy(null);
     }
   };
 
-  const handleDepositUsdc = async () => {
-    if (!address) return;
-    setBusy("deposit-usdc");
+  const handleWithdraw = async () => {
+    if (!address || !withdrawAmount) return;
+    setBusy("withdraw");
     try {
-      const amt = toFixed7(amountUsdc);
-      const op = pool.submit({
-        from: address,
-        spender: address,
-        to: address,
-        requests: [
-          { address: USDC_ID, amount: amt, request_type: RequestType.Supply },
-        ],
-      });
-      const hash = await signAndSubmit(signTransaction as any, op, address);
-      setLastHash(hash);
-      await updateBalance();
-    } finally {
-      setBusy(null);
-    }
-  };
+      const isXLM = selectedCurrency === "XLM";
+      const assetId = isXLM ? XLM_ID : USDC_ID;
+      const requestType = isXLM
+        ? RequestType.WithdrawCollateral
+        : RequestType.Withdraw;
 
-  const handleWithdrawXlm = async () => {
-    if (!address) return;
-    setBusy("withdraw-xlm");
-    try {
-      const op = pool.submit({
-        from: address,
-        spender: address,
-        to: address,
-        requests: [
-          {
-            address: XLM_ID,
-            amount: toFixed7(wAmountXlm),
-            request_type: RequestType.WithdrawCollateral,
-          },
-        ],
-      });
-      const hash = await signAndSubmit(signTransaction as any, op, address);
-      setLastHash(hash);
-      await updateBalance();
-    } finally {
-      setBusy(null);
-    }
-  };
-
-  const handleWithdrawUsdc = async () => {
-    if (!address) return;
-    setBusy("withdraw-usdc");
-    try {
       const op = pool.submit({
         from: address,
         spender: address,
         to: address,
         requests: [
           {
-            address: USDC_ID,
-            amount: toFixed7(wAmountUsdc),
-            request_type: RequestType.WithdrawCollateral,
+            address: assetId,
+            amount: toFixed7(withdrawAmount),
+            request_type: requestType,
           },
         ],
       });
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
+      setWithdrawAmount("");
+      
+      // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
+      await refetchTransactions();
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 2000);
+      setTimeout(() => {
+        updateBalance();
+        refetchTransactions();
+      }, 4000);
+    } catch (error) {
+      console.error("Error in handleWithdraw:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
+      alert(`Error withdrawing ${selectedCurrency}:\n${errorMessage}`);
     } finally {
       setBusy(null);
     }
   };
 
   return (
-    <Layout.Content>
-      <Layout.Inset>
-        <h2>Pool: {POOL_NAME}</h2>
-        <Card variant="secondary">
-          <Box gap="md">
-            <Input
-              label="Pool Address"
-              id="pool-id"
-              fieldSize="md"
-              copyButton={{ position: "right" }}
-              readOnly
-              value={poolAddress}
-            />
-            <Input
-              label="Connected Wallet"
-              id="wallet-id"
-              fieldSize="md"
-              copyButton={{ position: "right" }}
-              readOnly
-              value={address ?? "Not connected"}
-            />
-          </Box>
-        </Card>
-      </Layout.Inset>
+    <div className="pool-container lg:p-1 md:p-5 sm:p-5">
+      {/* Currency Selection Cards */}
+      <div className="currency-cards ">
+        <button
+          className={`currency-card ${selectedCurrency === "XLM" ? "active" : ""}`}
+          onClick={() => handleCurrencySelect("XLM")}
+          style={{
+            backgroundImage:
+              selectedCurrency === "XLM"
+                ? `url(/designs/Stellar-FullColor.svg)`
+                : `url(/designs/Stellar-WhiteBlack.svg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom -10px",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <div className="card-content">
+            <span className="invest-label">Invest in</span>
+            <span className="currency-name">XLM - Stellar</span>
+          </div>
+        </button>
 
-      <Layout.Inset>
-        <h3>Your Balances</h3>
-        <Card variant="primary">
-          <Box gap="md">
-            {error && <p style={{ color: "red" }}>{error.message}</p>}
-            <p>Status: {isLoading ? "Loading..." : isFunded ? "Funded" : "Not funded"}</p>
-            <p>XLM: {xlm}</p>
-            <ul>
-              {balances.map((b, i) => (
-                <li key={`${b.asset_type}-${i}`}>
-                  {formatBalanceLine(b)} — {b.balance}
-                </li>
-              ))}
-            </ul>
-            {lastHash && <p>Last Tx: {lastHash}</p>}
-          </Box>
-        </Card>
-      </Layout.Inset>
+        <button
+          className={`currency-card ${selectedCurrency === "USDC" ? "active" : ""}`}
+          onClick={() => handleCurrencySelect("USDC")}
+          style={{
+            backgroundImage:
+              selectedCurrency === "USDC"
+                ? `url(/designs/USDC-FullColor.svg)`
+                : `url(/designs/USDC-WhiteBlack.svg)`,
+            backgroundSize: "cover",
+            backgroundPosition: "center bottom -10px",
+            backgroundRepeat: "no-repeat",
+          }}
+        >
+          <div className="card-content">
+            <span className="invest-label">Invest in</span>
+            <span className="currency-name">USDC - USD Coin</span>
+          </div>
+        </button>
+      </div>
 
-      <Layout.Inset>
-        <h3>Deposit</h3>
-        <Card variant="secondary">
-          <Box gap="md">
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
-              <Input label="XLM amount" id="xlm-amt" fieldSize="md" value={amountXlm} onChange={(e) => setAmountXlm(e.target.value)} />
-              <Button variant="primary" size="md" disabled={!address || busy==="deposit-xlm"} onClick={handleDepositXlm}>Deposit XLM</Button>
+      {/* Deposit Section */}
+      <div className="action-section">
+        <div className="action-header">
+          <div className="action-info">
+            <div className="action-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 4V20M12 4L8 8M12 4L16 8"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
-              <Input label="USDC amount" id="usdc-amt" fieldSize="md" value={amountUsdc} onChange={(e) => setAmountUsdc(e.target.value)} />
-              <Button variant="primary" size="md" disabled={!address || busy==="deposit-usdc"} onClick={handleDepositUsdc}>Deposit USDC</Button>
+            <div>
+              <h3>Please select an amount</h3>
+              <p className="action-description">
+                This is the amount of currency you are investing
+              </p>
             </div>
-          </Box>
-        </Card>
-      </Layout.Inset>
+          </div>
+          <span className="earnings-badge">+%18 Currently</span>
+        </div>
+        <div className="action-input-row">
+          <input
+            type="number"
+            placeholder={selectedCurrency === "USDC" ? "$0.00" : "0.00 XLM"}
+            value={depositAmount}
+            onChange={(e) => setDepositAmount(e.target.value)}
+            className="amount-input"
+          />
+          <button
+            className="action-button"
+            onClick={handleDeposit}
+            disabled={!address || busy === "deposit" || !depositAmount}
+          >
+            {busy === "deposit" ? "Processing..." : "Deposit"}
+          </button>
+        </div>
+      </div>
 
-      <Layout.Inset>
-        <h3>Withdraw</h3>
-        <Card variant="secondary">
-          <Box gap="md">
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
-              <Input label="XLM amount" id="xlm-w-amt" fieldSize="md" value={wAmountXlm} onChange={(e) => setWAmountXlm(e.target.value)} />
-              <Button variant="primary" size="md" disabled={!address || busy==="withdraw-xlm"} onClick={handleWithdrawXlm}>Withdraw XLM</Button>
+      {/* Swap Icon */}
+      <div className="swap-icon">
+        <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M7 10L12 15L17 10M7 6L12 11L17 6"
+            stroke="white"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </div>
+
+      {/* Withdraw Section */}
+      <div className="action-section">
+        <div className="action-header">
+          <div className="action-info">
+            <div className="action-icon">
+              <svg
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M12 20V4M12 20L8 16M12 20L16 16"
+                  stroke="white"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
             </div>
-            <div style={{ display: "flex", gap: "0.75rem", alignItems: "flex-end", flexWrap: "wrap" }}>
-              <Input label="USDC amount" id="usdc-w-amt" fieldSize="md" value={wAmountUsdc} onChange={(e) => setWAmountUsdc(e.target.value)} />
-              <Button variant="primary" size="md" disabled={!address || busy==="withdraw-usdc"} onClick={handleWithdrawUsdc}>Withdraw USDC</Button>
+            <div>
+              <h3>Please select an amount</h3>
+              <p className="action-description">
+                This is the amount of currency you are withdrawing from your
+                investment
+              </p>
             </div>
-          </Box>
-        </Card>
-      </Layout.Inset>
-    </Layout.Content>
+          </div>
+          <span className="earnings-badge green">+$1,230.00 Earnings</span>
+        </div>
+        <div className="action-input-row">
+          <input
+            type="number"
+            placeholder={selectedCurrency === "USDC" ? "$0.00" : "0.00 XLM"}
+            value={withdrawAmount}
+            onChange={(e) => setWithdrawAmount(e.target.value)}
+            className="amount-input"
+          />
+          <button
+            className="action-button"
+            onClick={handleWithdraw}
+            disabled={!address || busy === "withdraw" || !withdrawAmount}
+          >
+            {busy === "withdraw" ? "Processing..." : "Withdraw"}
+          </button>
+        </div>
+      </div>
+
+      {/* Error/Success Messages */}
+      {!address && (
+        <p style={{ color: "#ff9800", textAlign: "center", marginTop: "2rem" }}>
+          ⚠️ Please connect your wallet to use this pool
+        </p>
+      )}
+      {lastHash && (
+        <p
+          style={{
+            color: "#4caf50",
+            textAlign: "center",
+            marginTop: "1rem",
+            fontSize: "0.875rem",
+          }}
+        >
+          ✅ Transaction successful: {lastHash.slice(0, 8)}...
+          {lastHash.slice(-8)}
+        </p>
+      )}
+    </div>
   );
 };
 
