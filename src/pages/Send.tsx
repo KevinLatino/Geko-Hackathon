@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { CircleDollarSign, Wallet, FileText, Check, ArrowLeft } from "lucide-react";
 import { Asset, Operation, TransactionBuilder, BASE_FEE, Networks, rpc, Memo } from "@stellar/stellar-sdk";
-import { rpcUrl } from "../contracts/util";
+import { rpcUrl, stellarNetwork } from "../contracts/util";
+import { getUSDCIssuer } from "../util/assets";
+import storage from "../util/storage";
 
 type Step = 1 | 2 | 3;
 type Currency = "XLM" | "USDC";
@@ -23,7 +25,27 @@ export default function Send() {
   const [warningMessage, setWarningMessage] = useState("");
   const [txHash, setTxHash] = useState("");
 
-  const usdcBalance = balances.find(b => b.asset_code === "USDC");
+  // Get network from storage or use stellarNetwork
+  const network = useMemo(() => {
+    const storedNetwork = storage.getItem("walletNetwork");
+    return storedNetwork || stellarNetwork;
+  }, []);
+
+  // Get USDC issuer based on network
+  const usdcIssuer = useMemo(() => getUSDCIssuer(network), [network]);
+
+  // Get network passphrase
+  const networkPassphrase = useMemo(() => {
+    const storedPassphrase = storage.getItem("networkPassphrase");
+    if (storedPassphrase) return storedPassphrase;
+    return network.toUpperCase() === "PUBLIC" ? Networks.PUBLIC : Networks.TESTNET;
+  }, [network]);
+
+  const usdcBalance = balances.find(b => 
+    b.asset_type !== "native" && 
+    b.asset_type !== "liquidity_pool_shares" && 
+    b.asset_code === "USDC"
+  );
   const availableBalance = selectedCurrency === "XLM" ? xlm : usdcBalance?.balance || "0";
 
   // Validate if destination account has trustline for USDC
@@ -31,16 +53,23 @@ export default function Send() {
     if (selectedCurrency === "XLM") return true; // XLM doesn't need trustline
     
     try {
-      const server = new rpc.Server(rpcUrl, {
-        allowHttp: rpcUrl.startsWith("http://"),
-      });
-      const destAccount = await server.getAccount(destinationAddress);
+      // Use Horizon API to check trustlines (RPC doesn't have balances)
+      const horizonUrl = network.toUpperCase() === "PUBLIC" 
+        ? "https://horizon.stellar.org" 
+        : "https://horizon-testnet.stellar.org";
+      
+      const response = await fetch(`${horizonUrl}/accounts/${destinationAddress}`);
+      if (!response.ok) {
+        throw new Error("Account not found");
+      }
+      
+      const destAccount = await response.json();
       
       // Check if account has USDC trustline
-      const hasUsdcTrustline = destAccount.balances.some(
+      const hasUsdcTrustline = destAccount.balances?.some(
         (balance: any) => 
           balance.asset_code === "USDC" && 
-          balance.asset_issuer === "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
+          balance.asset_issuer === usdcIssuer
       );
       
       if (!hasUsdcTrustline) {
@@ -91,11 +120,8 @@ export default function Send() {
           amount: amount,
         });
       } else {
-        // USDC on Stellar Testnet
-        const usdcAsset = new Asset(
-          "USDC",
-          "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
-        );
+        // USDC on Stellar
+        const usdcAsset = new Asset("USDC", usdcIssuer);
         operation = Operation.payment({
           destination: destinationAddress,
           asset: usdcAsset,
@@ -105,7 +131,7 @@ export default function Send() {
 
       const transactionBuilder = new TransactionBuilder(sourceAccount, {
         fee: BASE_FEE,
-        networkPassphrase: Networks.TESTNET,
+        networkPassphrase: networkPassphrase,
       }).addOperation(operation);
 
       if (memo) {
@@ -115,18 +141,18 @@ export default function Send() {
       const transaction = transactionBuilder.setTimeout(180).build();
       
       const signedResult = await signTransaction(transaction.toXDR(), {
-        networkPassphrase: Networks.TESTNET,
+        networkPassphrase: networkPassphrase,
         address,
       });
 
       const transactionToSubmit = TransactionBuilder.fromXDR(
         signedResult.signedTxXdr,
-        Networks.TESTNET
+        networkPassphrase
       );
 
       const result = await server.sendTransaction(transactionToSubmit);
       
-      if (result.status === "PENDING" || result.status === "SUCCESS") {
+      if (result.status === "PENDING") {
         setTxHash(result.hash);
         setShowSuccessModal(true);
         await updateBalance();
@@ -139,6 +165,8 @@ export default function Send() {
           setMemo("");
           setSendAll(false);
         }, 3000);
+      } else {
+        throw new Error(`Transaction failed with status: ${result.status}`);
       }
     } catch (error) {
       console.error("Error sending transaction:", error);
