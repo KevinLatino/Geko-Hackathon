@@ -42,7 +42,7 @@ const AppLayout: React.FC = () => {
 const AppRoutes = () => (
   <Routes>
     <Route element={<AppLayout />}>
-      <Route path="/" element={<Home />} />
+      {/* <Route path="/" element={<Home />} /> */}
       <Route path="/pool/Test" element={<Pool />} />
       <Route path="/debug" element={<Debugger />} />
       <Route path="/debug/:contractName" element={<Debugger />} />

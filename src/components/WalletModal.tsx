@@ -11,12 +11,15 @@ interface WalletModalProps {
   onClose: () => void;
 }
 
+type TransactionFilter = "all" | "investments" | "received" | "sent";
+
 const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
   const { address, currencyView, setCurrencyView, pendingCurrencyChange } = useWallet();
   const { xlm, balances } = useWalletBalance();
   const { transactions, loading } = useTransactions();
   const navigate = useNavigate();
   const [isFlipping, setIsFlipping] = useState(false);
+  const [filter, setFilter] = useState<TransactionFilter>("all");
 
   // Calculate total balance in USD
   const usdcBalance = balances.find(b => 
@@ -67,6 +70,15 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
     const networkPath = stellarNetwork.toLowerCase() === "public" ? "public" : "testnet";
     window.open(`https://stellar.expert/explorer/${networkPath}/tx/${hash}`, '_blank');
   };
+
+  // Filter transactions based on selected filter
+  const filteredTransactions = transactions.filter(tx => {
+    if (filter === "all") return true;
+    if (filter === "investments") return tx.type === "deposit" || tx.type === "withdraw";
+    if (filter === "received") return tx.type === "received";
+    if (filter === "sent") return tx.type === "sent";
+    return true;
+  });
 
   return (
     <>
@@ -134,14 +146,42 @@ const WalletModal: React.FC<WalletModalProps> = ({ isOpen }) => {
           <h3 className="text-white text-sm font-semibold">All Transactions</h3>
         </div>
 
+        {/* Transaction Filters */}
+        <div className="transaction-filters">
+          <button
+            onClick={() => setFilter("all")}
+            className={`filter-btn ${filter === "all" ? "active" : ""}`}
+          >
+            All
+          </button>
+          <button
+            onClick={() => setFilter("investments")}
+            className={`filter-btn ${filter === "investments" ? "active" : ""}`}
+          >
+            Investments
+          </button>
+          <button
+            onClick={() => setFilter("received")}
+            className={`filter-btn ${filter === "received" ? "active" : ""}`}
+          >
+            Received
+          </button>
+          <button
+            onClick={() => setFilter("sent")}
+            className={`filter-btn ${filter === "sent" ? "active" : ""}`}
+          >
+            Sent
+          </button>
+        </div>
+
         {/* Transactions List */}
         <div className="wallet-transactions">
           {loading ? (
             <div className="text-white/60 text-sm text-center py-8">Loading transactions...</div>
-          ) : transactions.length === 0 ? (
+          ) : filteredTransactions.length === 0 ? (
             <div className="text-white/60 text-sm text-center py-8">No transactions yet</div>
           ) : (
-            transactions.map((tx) => {
+            filteredTransactions.map((tx) => {
               // Safety check
               if (!tx.hash || !tx.id) return null;
               
