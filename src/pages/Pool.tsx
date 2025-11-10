@@ -443,7 +443,7 @@ const Pool: React.FC = () => {
             fontSize: "0.875rem",
           }}
         >
-          ✅ Transaction successful: {lastHash.slice(0, 8)}...
+           Transaction successful: {lastHash.slice(0, 8)}...
           {lastHash.slice(-8)}
         </p>
       )}
