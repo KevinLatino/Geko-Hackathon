@@ -2594,10 +2594,6 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   pointer-events: none;
 }
 
-.rewards-quest-card:hover::before {
-  opacity: 1;
-}
-
 .rewards-quest-card.completed {
   background: linear-gradient(135deg, rgba(34, 197, 94, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
 }
