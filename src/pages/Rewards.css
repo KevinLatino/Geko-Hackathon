@@ -92,7 +92,6 @@
 
 .rewards-quest-card:hover {
   transform: scale(1.03);
-  box-shadow: 0 25px 35px -20px rgba(0, 0, 0, 0.6);
 }
 
 .rewards-quest-card.completed {
@@ -234,9 +233,6 @@
   transition: background 0.2s ease;
 }
 
-.rewards-modal-close:hover {
-  background: #444444;
-}
 
 .rewards-modal-header {
   display: flex;

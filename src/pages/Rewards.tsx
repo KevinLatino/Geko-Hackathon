@@ -10,7 +10,7 @@ interface Quest {
   description: string;
   action: string;
   actionPath?: string;
-  nftReward: number; 
+  nftReward: number; // NFT index (0-25)
   completed: boolean;
   icon: React.ReactNode;
 }
