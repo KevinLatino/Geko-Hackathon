@@ -1,0 +1,15 @@
+{
+  "name": "Geko NFT #17",
+  "description": "A unique Geko NFT from the Geko collection. This is NFT #17 of 25.",
+  "image": "ipfs://bafkreia7v6q4dednjg7ghreopzbhbec3mpke4xsc6omhchhhcwikfkp74i",
+  "attributes": [
+    {
+      "trait_type": "Token ID",
+      "value": "17"
+    },
+    {
+      "trait_type": "Collection",
+      "value": "Geko NFT"
+    }
+  ]
+}

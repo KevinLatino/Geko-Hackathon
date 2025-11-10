@@ -18,13 +18,25 @@ const Navbar: React.FC<NavbarProps> = ({
   setIsProfileModalOpen,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [tooltipStates, setTooltipStates] = useState<Record<string, boolean>>({});
+  const [tooltipStates, setTooltipStates] = useState<Record<string, boolean>>(
+    {}
+  );
 
   const navItems = [
     {
       path: "/",
       icon: <Icon.Home01 size="lg" />,
       label: "Home",
+    },
+    {
+      path: "/rewards",
+      icon: <Icon.Trophy01 size="lg" />,
+      label: "Rewards",
+    },
+    {
+      path: "/envelopes",
+      icon: <Icon.PiggyBank02 size="lg" />,
+      label: "Envelopes",
     },
     {
       path: "/pool/Test",
@@ -35,11 +47,6 @@ const Navbar: React.FC<NavbarProps> = ({
       path: "/moonpay",
       icon: <Icon.CreditCard02 size="lg" />,
       label: "Buy Crypto",
-    },
-    {
-      path: "/envelopes",
-      icon: <Icon.PiggyBank02 size="lg" />,
-      label: "Envelopes",
     },
   ];
 
@@ -87,8 +94,12 @@ const Navbar: React.FC<NavbarProps> = ({
       >
         <div className="navbar-logo desktop-only">
           <div
-            onMouseEnter={() => setTooltipStates({ ...tooltipStates, wallet: true })}
-            onMouseLeave={() => setTooltipStates({ ...tooltipStates, wallet: false })}
+            onMouseEnter={() =>
+              setTooltipStates({ ...tooltipStates, wallet: true })
+            }
+            onMouseLeave={() =>
+              setTooltipStates({ ...tooltipStates, wallet: false })
+            }
           >
             <Tooltip
               isVisible={tooltipStates.wallet}
@@ -117,8 +128,12 @@ const Navbar: React.FC<NavbarProps> = ({
           {navItems.map((item) => (
             <div
               key={item.path}
-              onMouseEnter={() => setTooltipStates({ ...tooltipStates, [item.path]: true })}
-              onMouseLeave={() => setTooltipStates({ ...tooltipStates, [item.path]: false })}
+              onMouseEnter={() =>
+                setTooltipStates({ ...tooltipStates, [item.path]: true })
+              }
+              onMouseLeave={() =>
+                setTooltipStates({ ...tooltipStates, [item.path]: false })
+              }
             >
               <Tooltip
                 isVisible={tooltipStates[item.path]}
@@ -144,8 +159,12 @@ const Navbar: React.FC<NavbarProps> = ({
 
         <div className="navbar-profile">
           <div
-            onMouseEnter={() => setTooltipStates({ ...tooltipStates, profile: true })}
-            onMouseLeave={() => setTooltipStates({ ...tooltipStates, profile: false })}
+            onMouseEnter={() =>
+              setTooltipStates({ ...tooltipStates, profile: true })
+            }
+            onMouseLeave={() =>
+              setTooltipStates({ ...tooltipStates, profile: false })
+            }
           >
             <Tooltip
               isVisible={tooltipStates.profile}
