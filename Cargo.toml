@@ -1,9 +1,5 @@
 [workspace]
-members = [
-    "contracts/geko-token",
-    "contracts/geko-nft",
-    "contracts/geko-envelopes",
-]
+members = ["contracts/*"]
 resolver = "2"
 
 [workspace.package]
@@ -15,7 +11,6 @@ version = "0.0.1"
 
 [workspace.dependencies.soroban-sdk]
 version = "23.0.2"
-default-features = false
 
 [workspace.dependencies.stellar-access]
 git = "https://github.com/OpenZeppelin/stellar-contracts"

@@ -25,7 +25,7 @@ export default function Send() {
   const { refetch: refetchTransactions } = useTransactions();
   const [step, setStep] = useState<Step>(1);
   const [destinationAddress, setDestinationAddress] = useState("");
-  const [selectedCurrency, setSelectedCurrency] = useState<Currency>("USDC");
+  const [selectedCurrency, setSelectedCurrency] = useState<Currency>("XLM");
   const [amount, setAmount] = useState("");
   const [memo, setMemo] = useState("");
   const [sendAll, setSendAll] = useState(false);
@@ -367,7 +367,7 @@ export default function Send() {
                         : "text-white/60 hover:text-white"
                     }`}
                   >
-                    XML
+                    XLM
                   </button>
                   <button
                     onClick={() => setSelectedCurrency("USDC")}

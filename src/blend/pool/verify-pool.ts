@@ -9,10 +9,10 @@ import { config } from "../utils/env_config.js";
  * the contract address and network connectivity.
  *
  * Usage:
- *   npm run pool:verify testnet Geko-Pool
+ *   npm run pool:verify testnet MyTestPool
  *
  * Or directly:
- *   tsx src/blend/pool/verify-pool.ts testnet Geko-Pool
+ *   tsx src/blend/pool/verify-pool.ts testnet MyTestPool
  */
 
 if (process.argv.length < 3) {

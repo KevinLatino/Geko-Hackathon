@@ -8,10 +8,10 @@ import { TxParams, invokeSorobanOperation, signWithKeypair } from '../utils/tx.j
  * This function will update the pool status based on backstop threshold requirements
  * 
  * Usage:
- *   npm run pool:update-status testnet admin Geko-Pool
+ *   npm run pool:update-status testnet admin Test
  * 
  * Or directly:
- *   tsx src/blend/pool/update-status.ts testnet admin Geko-Pool
+ *   tsx src/blend/pool/update-status.ts testnet admin Test
  */
 
 if (process.argv.length < 4) {
