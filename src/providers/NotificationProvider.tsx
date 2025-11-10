@@ -5,7 +5,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
-import { Notification as StellarNotification } from "@stellar/design-system";
+import { Notification as StellarNotification, Icon } from "@stellar/design-system";
 import "./NotificationProvider.css"; // Import CSS for sliding effect
 
 type NotificationType =
@@ -19,10 +19,11 @@ interface Notification {
   message: string;
   type: NotificationType;
   isVisible: boolean;
+  showXCloseIcon?: boolean;
 }
 
 interface NotificationContextType {
-  addNotification: (message: string, type: NotificationType) => void;
+  addNotification: (message: string, type: NotificationType, showXCloseIcon?: boolean) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
@@ -35,12 +36,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const addNotification = useCallback(
-    (message: string, type: NotificationType) => {
+    (message: string, type: NotificationType, showXCloseIcon?: boolean) => {
       const newNotification = {
         id: `${type}-${Date.now().toString()}`,
         message,
         type,
         isVisible: true,
+        showXCloseIcon: showXCloseIcon || false,
       };
       setNotifications((prev) => [...prev, newNotification]);
 
@@ -67,7 +69,16 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
             className={`notification ${notification.isVisible ? "slide-in" : "slide-out"}`}
           >
             <StellarNotification
-              title={notification.message}
+              title={
+                notification.showXCloseIcon ? (
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <Icon.XClose size="md" color="#FF3B30" />
+                    <span>{notification.message}</span>
+                  </div>
+                ) : (
+                  notification.message
+                )
+              }
               variant={notification.type}
             />
           </div>

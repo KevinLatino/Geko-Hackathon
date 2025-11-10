@@ -1,10 +1,18 @@
-import { useState, useMemo } from "react";
+import { Icon } from "@stellar/design-system";
+import {
+  Asset,
+  BASE_FEE,
+  Memo,
+  Networks,
+  Operation,
+  rpc,
+  TransactionBuilder,
+} from "@stellar/stellar-sdk";
+import { useMemo, useState } from "react";
+import { rpcUrl, stellarNetwork } from "../contracts/util";
+import { useTransactions } from "../hooks/useTransactions";
 import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
-import { useTransactions } from "../hooks/useTransactions";
-import { CircleDollarSign, Wallet, FileText, Check, ArrowLeft } from "lucide-react";
-import { Asset, Operation, TransactionBuilder, BASE_FEE, Networks, rpc, Memo } from "@stellar/stellar-sdk";
-import { rpcUrl, stellarNetwork } from "../contracts/util";
 import { getUSDCIssuer } from "../util/assets";
 import storage from "../util/storage";
 
@@ -40,40 +48,46 @@ export default function Send() {
   const networkPassphrase = useMemo(() => {
     const storedPassphrase = storage.getItem("networkPassphrase");
     if (storedPassphrase) return storedPassphrase;
-    return network.toUpperCase() === "PUBLIC" ? Networks.PUBLIC : Networks.TESTNET;
+    return network.toUpperCase() === "PUBLIC"
+      ? Networks.PUBLIC
+      : Networks.TESTNET;
   }, [network]);
 
-  const usdcBalance = balances.find(b => 
-    b.asset_type !== "native" && 
-    b.asset_type !== "liquidity_pool_shares" && 
-    b.asset_code === "USDC"
+  const usdcBalance = balances.find(
+    (b) =>
+      b.asset_type !== "native" &&
+      b.asset_type !== "liquidity_pool_shares" &&
+      b.asset_code === "USDC"
   );
-  const availableBalance = selectedCurrency === "XLM" ? xlm : usdcBalance?.balance || "0";
+  const availableBalance =
+    selectedCurrency === "XLM" ? xlm : usdcBalance?.balance || "0";
 
   // Validate if destination account has trustline for USDC
   const validateDestinationAccount = async () => {
     if (selectedCurrency === "XLM") return true; // XLM doesn't need trustline
-    
+
     try {
       // Use Horizon API to check trustlines (RPC doesn't have balances)
-      const horizonUrl = network.toUpperCase() === "PUBLIC" 
-        ? "https://horizon.stellar.org" 
-        : "https://horizon-testnet.stellar.org";
-      
-      const response = await fetch(`${horizonUrl}/accounts/${destinationAddress}`);
+      const horizonUrl =
+        network.toUpperCase() === "PUBLIC"
+          ? "https://horizon.stellar.org"
+          : "https://horizon-testnet.stellar.org";
+
+      const response = await fetch(
+        `${horizonUrl}/accounts/${destinationAddress}`
+      );
       if (!response.ok) {
         throw new Error("Account not found");
       }
-      
+
       const destAccount = await response.json();
-      
+
       // Check if account has USDC trustline
       const hasUsdcTrustline = destAccount.balances?.some(
-        (balance: any) => 
-          balance.asset_code === "USDC" && 
-          balance.asset_issuer === usdcIssuer
+        (balance: any) =>
+          balance.asset_code === "USDC" && balance.asset_issuer === usdcIssuer
       );
-      
+
       if (!hasUsdcTrustline) {
         setWarningMessage(
           "⚠️ The destination account doesn't have a trustline for USDC. The transaction will fail. The recipient needs to add a USDC trustline first."
@@ -81,7 +95,7 @@ export default function Send() {
         setShowWarningModal(true);
         return false;
       }
-      
+
       return true;
     } catch (error) {
       setWarningMessage(
@@ -106,14 +120,14 @@ export default function Send() {
 
   const handleSend = async () => {
     if (!address || !signTransaction || !destinationAddress || !amount) return;
-    
+
     setLoading(true);
     try {
       const server = new rpc.Server(rpcUrl, {
         allowHttp: rpcUrl.startsWith("http://"),
       });
       const sourceAccount = await server.getAccount(address);
-      
+
       let operation;
       if (selectedCurrency === "XLM") {
         operation = Operation.payment({
@@ -141,7 +155,7 @@ export default function Send() {
       }
 
       const transaction = transactionBuilder.setTimeout(180).build();
-      
+
       const signedResult = await signTransaction(transaction.toXDR(), {
         networkPassphrase: networkPassphrase,
         address,
@@ -153,11 +167,11 @@ export default function Send() {
       );
 
       const result = await server.sendTransaction(transactionToSubmit);
-      
+
       if (result.status === "PENDING") {
         setTxHash(result.hash);
         setShowSuccessModal(true);
-        
+
         // Update balance and transactions
         await updateBalance();
         await refetchTransactions();
@@ -169,7 +183,7 @@ export default function Send() {
           updateBalance();
           refetchTransactions();
         }, 4000);
-        
+
         // Reset form
         setTimeout(() => {
           setStep(1);
@@ -183,20 +197,23 @@ export default function Send() {
       }
     } catch (error) {
       console.error("Error sending transaction:", error);
-      
+
       let errorMsg = "Unknown error occurred";
       if (error instanceof Error) {
         errorMsg = error.message;
       } else if (typeof error === "string") {
         errorMsg = error;
       }
-      
+
       // Check for common errors
       if (errorMsg.includes("trustline")) {
         setWarningMessage(
           "❌ Transaction Failed: The destination account doesn't have a trustline for USDC. The recipient must add a USDC trustline before they can receive USDC."
         );
-      } else if (errorMsg.includes("Account not found") || errorMsg.includes("does not exist")) {
+      } else if (
+        errorMsg.includes("Account not found") ||
+        errorMsg.includes("does not exist")
+      ) {
         setWarningMessage(
           "❌ Transaction Failed: The destination account does not exist or is invalid."
         );
@@ -207,7 +224,7 @@ export default function Send() {
       } else {
         setWarningMessage(`❌ Transaction Failed: ${errorMsg}`);
       }
-      
+
       setShowWarningModal(true);
     } finally {
       setLoading(false);
@@ -227,21 +244,21 @@ export default function Send() {
 
   if (!address) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-8">
+      <div className="flex flex-col items-center justify-center h-screen px-8 overflow-hidden">
         <p className="text-white text-lg">Please connect your wallet first</p>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-8 py-20">
+    <div className="send-page flex flex-col items-center justify-center h-screen px-8 overflow-hidden">
       <div className="max-w-2xl w-full flex flex-col items-center gap-8">
         {/* Stepper */}
         <div className="flex items-center justify-center w-full gap-4">
           {/* Step 1 */}
           <div className="flex flex-col items-center gap-2">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
                 step >= 1
                   ? step === 1
                     ? "bg-blue-600"
@@ -249,21 +266,29 @@ export default function Send() {
                   : "bg-gray-700"
               }`}
             >
-              <Wallet className="w-7 h-7 text-white" />
+              <Icon.Wallet01
+                size="lg"
+                color="#FFFFFF"
+                style={{ width: "28px", height: "28px" }}
+              />
             </div>
             <div className="text-center">
               <p className="text-xs text-white/60">STEP 1</p>
-              <p className="text-sm text-white font-medium">Wallet Information</p>
+              <p className="text-sm text-white font-medium">
+                Wallet Information
+              </p>
             </div>
           </div>
 
           {/* Line 1 */}
-          <div className={`h-0.5 w-24 ${step >= 2 ? "bg-blue-600" : "bg-gray-700"}`} />
+          <div
+            className={`h-0.5 w-24 ${step >= 2 ? "bg-blue-600" : "bg-gray-700"}`}
+          />
 
           {/* Step 2 */}
           <div className="flex flex-col items-center gap-2">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
                 step >= 2
                   ? step === 2
                     ? "bg-blue-600"
@@ -271,7 +296,11 @@ export default function Send() {
                   : "bg-gray-700"
               }`}
             >
-              <CircleDollarSign className="w-7 h-7 text-white" />
+              <Icon.CoinsStacked02
+                size="lg"
+                color="#FFFFFF"
+                style={{ width: "28px", height: "28px" }}
+              />
             </div>
             <div className="text-center">
               <p className="text-xs text-white/60">STEP 2</p>
@@ -280,16 +309,22 @@ export default function Send() {
           </div>
 
           {/* Line 2 */}
-          <div className={`h-0.5 w-24 ${step >= 3 ? "bg-blue-600" : "bg-gray-700"}`} />
+          <div
+            className={`h-0.5 w-24 ${step >= 3 ? "bg-blue-600" : "bg-gray-700"}`}
+          />
 
           {/* Step 3 */}
           <div className="flex flex-col items-center gap-2">
             <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
+              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
                 step >= 3 ? "bg-blue-600" : "bg-gray-700"
               }`}
             >
-              <FileText className="w-7 h-7 text-white" />
+              <Icon.ReceiptCheck
+                size="lg"
+                color="#FFFFFF"
+                style={{ width: "28px", height: "28px" }}
+              />
             </div>
             <div className="text-center">
               <p className="text-xs text-white/60">STEP 3</p>
@@ -303,7 +338,9 @@ export default function Send() {
           {step === 1 && (
             <div className="flex flex-col gap-6">
               <div>
-                <label className="text-white/80 text-sm mb-2 block">Wallet Direction</label>
+                <label className="text-white/80 text-sm mb-2 block">
+                  Wallet Direction
+                </label>
                 <input
                   type="text"
                   placeholder="Wallet information goes here..."
@@ -325,7 +362,9 @@ export default function Send() {
           {step === 2 && (
             <div className="flex flex-col gap-6">
               <div>
-                <label className="text-white/80 text-sm mb-2 block">Currency</label>
+                <label className="text-white/80 text-sm mb-2 block">
+                  Currency
+                </label>
                 <div className="flex gap-2 bg-[#202020] border border-white/10 rounded-full p-2">
                   <button
                     onClick={() => setSelectedCurrency("XLM")}
@@ -351,7 +390,9 @@ export default function Send() {
               </div>
 
               <div>
-                <label className="text-white/80 text-sm mb-2 block">Amount</label>
+                <label className="text-white/80 text-sm mb-2 block">
+                  Amount
+                </label>
                 <input
                   type="number"
                   step="0.0000001"
@@ -364,7 +405,8 @@ export default function Send() {
 
               <div className="flex items-center justify-between">
                 <p className="text-white/60 text-sm">
-                  Available: {parseFloat(availableBalance || "0").toFixed(4)} {selectedCurrency}
+                  Available: {parseFloat(availableBalance || "0").toFixed(4)}{" "}
+                  {selectedCurrency}
                 </p>
                 <label className="flex items-center gap-2 cursor-pointer">
                   <input
@@ -392,7 +434,7 @@ export default function Send() {
                 onClick={() => setStep(1)}
                 className="flex items-center gap-2 text-white/60 hover:text-white transition-all"
               >
-                <ArrowLeft size={16} />
+                <Icon.ArrowLeft size="md" />
                 Go back
               </button>
             </div>
@@ -401,16 +443,23 @@ export default function Send() {
           {step === 3 && (
             <div className="flex flex-col gap-6">
               <div>
-                <label className="text-white/80 text-sm mb-2 block">Amount</label>
+                <label className="text-white/80 text-sm mb-2 block">
+                  Amount
+                </label>
                 <div className="bg-[#202020] border border-white/10 rounded-xl px-6 py-8 text-center">
                   <p className="text-4xl font-bold text-white">
-                    {amount} <span className="text-white/60 text-2xl">{selectedCurrency}</span>
+                    {amount}{" "}
+                    <span className="text-white/60 text-2xl">
+                      {selectedCurrency}
+                    </span>
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="text-white/80 text-sm mb-2 block">Transaction memo</label>
+                <label className="text-white/80 text-sm mb-2 block">
+                  Transaction memo
+                </label>
                 <input
                   type="text"
                   placeholder="Enter transaction memo"
@@ -432,7 +481,7 @@ export default function Send() {
                 onClick={() => setStep(2)}
                 className="flex items-center gap-2 text-white/60 hover:text-white transition-all"
               >
-                <ArrowLeft size={16} />
+                <Icon.ArrowLeft size="md" />
                 Go back
               </button>
             </div>
@@ -445,11 +494,15 @@ export default function Send() {
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-[#202020] border border-white/10 rounded-3xl p-8 max-w-md w-full flex flex-col items-center gap-6">
             <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center">
-              <Check className="w-10 h-10 text-white" />
+              <Icon.Check size="lg" color="#FFFFFF" />
             </div>
             <div className="text-center">
-              <h2 className="text-2xl font-bold text-white mb-2">Transaction Sent!</h2>
-              <p className="text-white/60">Your transaction has been successfully submitted to the network.</p>
+              <h2 className="text-2xl font-bold text-white mb-2">
+                Transaction Sent!
+              </h2>
+              <p className="text-white/60">
+                Your transaction has been successfully submitted to the network.
+              </p>
             </div>
             <div className="w-full bg-[#202020] rounded-xl px-4 py-3">
               <p className="text-white/60 text-xs mb-1">Transaction Hash:</p>
@@ -490,7 +543,10 @@ export default function Send() {
             </div>
             <div className="w-full bg-yellow-500/10 border border-yellow-500/30 rounded-xl px-4 py-3">
               <p className="text-yellow-500/80 text-xs">
-                <strong>What is a trustline?</strong> In Stellar, accounts must establish a trustline before receiving any asset other than XLM. The recipient needs to create a USDC trustline in their wallet first.
+                <strong>What is a trustline?</strong> In Stellar, accounts must
+                establish a trustline before receiving any asset other than XLM.
+                The recipient needs to create a USDC trustline in their wallet
+                first.
               </p>
             </div>
             <button
@@ -505,4 +561,3 @@ export default function Send() {
     </div>
   );
 }
-

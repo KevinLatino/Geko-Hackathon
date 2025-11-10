@@ -1,8 +1,3 @@
-import React, { useMemo, useState } from "react";
-import { useWallet } from "../hooks/useWallet";
-import { useWalletBalance } from "../hooks/useWalletBalance";
-import { useTransactions } from "../hooks/useTransactions";
-import contracts from "../../testnet.contracts.json";
 import { PoolContractV2, RequestType } from "@blend-capital/blend-sdk";
 import {
   Transaction,
@@ -10,7 +5,14 @@ import {
   rpc,
   xdr,
 } from "@stellar/stellar-sdk";
-import { rpcUrl, networkPassphrase } from "../contracts/util";
+import React, { useMemo, useState } from "react";
+import contracts from "../../testnet.contracts.json";
+import { networkPassphrase, rpcUrl, stellarNetwork } from "../contracts/util";
+import { useNotification } from "../hooks/useNotification";
+import { useTransactions } from "../hooks/useTransactions";
+import { useWallet } from "../hooks/useWallet";
+import { useWalletBalance } from "../hooks/useWalletBalance";
+import { getUSDCIssuer } from "../util/assets";
 
 const POOL_NAME = "Test";
 const XLM_ID = (contracts as any).ids?.["XLM"] as string;
@@ -63,8 +65,9 @@ async function signAndSubmit(
 
 const Pool: React.FC = () => {
   const { address, signTransaction, triggerCurrencyChange } = useWallet();
-  const { updateBalance } = useWalletBalance();
+  const { updateBalance, balances } = useWalletBalance();
   const { refetch: refetchTransactions } = useTransactions();
+  const { addNotification } = useNotification();
   const poolAddress = (contracts as any).ids?.[POOL_NAME] ?? "";
   const pool = useMemo(() => new PoolContractV2(poolAddress), [poolAddress]);
 
@@ -78,11 +81,43 @@ const Pool: React.FC = () => {
 
   const toFixed7 = (v: string) => BigInt(Math.round(Number(v) * 1e7));
 
+  const checkUSDCTrustline = async (): Promise<boolean> => {
+    if (!address) return false;
+
+    try {
+      const network =
+        stellarNetwork.toUpperCase() === "PUBLIC" ? "PUBLIC" : "TESTNET";
+      const usdcIssuer = getUSDCIssuer(network);
+      const horizonUrl =
+        network === "PUBLIC"
+          ? "https://horizon.stellar.org"
+          : "https://horizon-testnet.stellar.org";
+
+      const response = await fetch(`${horizonUrl}/accounts/${address}`);
+      if (!response.ok) {
+        return false;
+      }
+
+      const account = await response.json();
+
+      // Check if account has USDC trustline
+      const hasUsdcTrustline = account.balances?.some(
+        (balance: any) =>
+          balance.asset_code === "USDC" && balance.asset_issuer === usdcIssuer
+      );
+
+      return hasUsdcTrustline || false;
+    } catch (error) {
+      console.error("Error checking trustline:", error);
+      return false;
+    }
+  };
+
   const handleCurrencySelect = (currency: "XLM" | "USDC") => {
     if (currency === selectedCurrency) return;
-    
+
     setSelectedCurrency(currency);
-    
+
     // Trigger animated currency change in wallet card
     if (currency === "USDC") {
       triggerCurrencyChange("USD");
@@ -93,6 +128,49 @@ const Pool: React.FC = () => {
 
   const handleDeposit = async () => {
     if (!address || !depositAmount) return;
+
+    // Check if it's USDC and validate trustline and balance
+    if (selectedCurrency === "USDC") {
+      const hasTrustline = await checkUSDCTrustline();
+      const usdcBalance = balances.find(
+        (b) =>
+          b.asset_type !== "native" &&
+          b.asset_type !== "liquidity_pool_shares" &&
+          b.asset_code === "USDC"
+      );
+      const hasBalance = usdcBalance && parseFloat(usdcBalance.balance) > 0;
+
+      if (!hasTrustline) {
+        addNotification(
+          "You don't have a USDC trustline. Please add a USDC trustline first to deposit USDC.",
+          "error",
+          true
+        );
+        return;
+      }
+
+      if (!hasBalance) {
+        addNotification(
+          "You don't have USDC balance. Please acquire USDC first to make a deposit.",
+          "error",
+          true
+        );
+        return;
+      }
+
+      const depositAmountNum = parseFloat(depositAmount);
+      const availableBalance = parseFloat(usdcBalance.balance);
+
+      if (depositAmountNum > availableBalance) {
+        addNotification(
+          `Insufficient USDC balance. You have ${availableBalance.toFixed(2)} USDC available.`,
+          "error",
+          true
+        );
+        return;
+      }
+    }
+
     setBusy("deposit");
     try {
       const isXLM = selectedCurrency === "XLM";
@@ -116,7 +194,7 @@ const Pool: React.FC = () => {
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
       setDepositAmount("");
-      
+
       // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
       await refetchTransactions();
@@ -128,11 +206,15 @@ const Pool: React.FC = () => {
         updateBalance();
         refetchTransactions();
       }, 4000);
+      addNotification("Deposit successful!", "success");
     } catch (error) {
       console.error("Error in handleDeposit:", error);
       const errorMessage =
-        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
-      alert(`Error depositing ${selectedCurrency}:\n${errorMessage}`);
+        error instanceof Error ? error.message : "Unknown error";
+      addNotification(
+        `Error depositing ${selectedCurrency}: ${errorMessage}`,
+        "error"
+      );
     } finally {
       setBusy(null);
     }
@@ -163,7 +245,7 @@ const Pool: React.FC = () => {
       const hash = await signAndSubmit(signTransaction as any, op, address);
       setLastHash(hash);
       setWithdrawAmount("");
-      
+
       // Update balance and transactions immediately and retry a few times to ensure it's updated
       await updateBalance();
       await refetchTransactions();
@@ -175,11 +257,15 @@ const Pool: React.FC = () => {
         updateBalance();
         refetchTransactions();
       }, 4000);
+      addNotification("Withdraw successful!", "success");
     } catch (error) {
       console.error("Error in handleWithdraw:", error);
       const errorMessage =
-        error instanceof Error ? error.message : JSON.stringify(error, null, 2);
-      alert(`Error withdrawing ${selectedCurrency}:\n${errorMessage}`);
+        error instanceof Error ? error.message : "Unknown error";
+      addNotification(
+        `Error withdrawing ${selectedCurrency}: ${errorMessage}`,
+        "error"
+      );
     } finally {
       setBusy(null);
     }

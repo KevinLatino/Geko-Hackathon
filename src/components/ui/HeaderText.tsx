@@ -1,7 +1,7 @@
 
 import { headerTextVariants } from '../animations/header-text';
 import { motion } from 'framer-motion';
-import { Lightbulb, LucideIcon } from 'lucide-react';
+import { Icon } from '@stellar/design-system';
 import { useAnimationOnView } from '../../hooks/useAnimationOnView';
 import React, { useRef } from 'react';
 import { twMerge } from 'tailwind-merge';
@@ -14,7 +14,6 @@ interface HeaderTextProps {
   titleClassName?: string;
   subtitleClassName?: string;
   iconBlock?: React.ReactNode;
-  icon?: LucideIcon;
   align?: 'center' | 'left' | 'right';
 }
 
@@ -26,12 +25,10 @@ export const HeaderText: React.FC<HeaderTextProps> = ({
   titleClassName,
   subtitleClassName,
   iconBlock,
-  icon,
   align = 'center',
 }) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const controls = useAnimationOnView(containerRef);
-  const Icon = icon ?? Lightbulb;
 
   const alignClasses = {
     center: 'items-center text-center',
@@ -51,7 +48,7 @@ export const HeaderText: React.FC<HeaderTextProps> = ({
         className="px-3.5 py-2 rounded-full border border-white/30 bg-background-geko flex items-center gap-2"
         variants={headerTextVariants.item}
       >
-        {iconBlock ?? (icon && <Icon className="w-4 h-4 text-white/80" />)}
+        {iconBlock ?? <Icon.Lightbulb01 size="sm" color="rgba(255, 255, 255, 0.8)" />}
         <span className={twMerge('text-xs text-white/80', tagClassName)}>
           {tag}
         </span>

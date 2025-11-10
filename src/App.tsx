@@ -13,6 +13,7 @@ import Receive from "./pages/Receive.tsx";
 import Send from "./pages/Send.tsx";
 import MoonPayPage from "./pages/MoonPay.tsx";
 import EnvelopesPage from "./components/modules/envelopes/pages/EnvelopesPage.tsx";
+import Envelopes from "./pages/Envelopes.tsx";
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
@@ -51,7 +52,7 @@ const AppRoutes = () => (
       <Route path="/rewards" element={<Rewards />} />
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/moonpay" element={<MoonPayPage />} />
-      <Route path="/envelopes" element={<EnvelopesPage />} />
+      <Route path="/envelopes" element={<Envelopes />} />
       <Route path="/debug" element={<Debugger />} />
       <Route path="/debug/:contractName" element={<Debugger />} />
     </Route>

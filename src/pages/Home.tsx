@@ -1,4 +1,4 @@
-import { CircleDollarSign, TrendingUp } from "lucide-react";
+import { Icon } from "@stellar/design-system";
 import { useNavigate } from "react-router-dom";
 import { LiquidBackgroundLayout } from "../components/layout/liquid-background-layout";
 import HeaderText from "../components/ui/HeaderText";
@@ -6,7 +6,7 @@ import { useWallet } from "../hooks/useWallet";
 import { connectWallet } from "../util/wallet";
 
 export default function Home() {
-const { address } = useWallet();
+  const { address } = useWallet();
   const navigate = useNavigate();
 
   const handleGetStarted = async () => {
@@ -25,15 +25,18 @@ const { address } = useWallet();
             tag="Start your financial freedom"
             title="The app that educates saves and invests for you"
             subtitle="Don't just manage your money, make it grow. With Geko, your financial education and your investment power come together in one app, designed for your success"
-            icon={TrendingUp}
+            iconBlock={<Icon.TrendUp01 size="sm" color="#FFFFFF" />}
             align="center"
           />
           <div className="flex gap-4 justify-center pointer-events-auto">
             <button
               onClick={handleGetStarted}
-              className="flex gap-2 bg-white text-black p-2 rounded-full hover:bg-gray-100">
-              <CircleDollarSign size={20} />
-              <span className="text-black group-hover:text-black">{address ? "Launch App" : "Connect Wallet"}</span>
+              className="flex gap-2 bg-white text-black p-2 rounded-full hover:bg-gray-100"
+            >
+              <Icon.CoinsStacked02 size="md" color="#000000" />
+              <span className="text-black group-hover:text-black">
+                {address ? "Launch App" : "Connect Wallet"}
+              </span>
             </button>
           </div>
         </div>
