@@ -15,10 +15,10 @@ import { TxParams, invokeSorobanOperation, signWithKeypair } from '../utils/tx.j
  *   4 = Admin Frozen (does not allow deposits or borrowing)
  * 
  * Usage:
- *   npm run pool:status testnet admin Test 2
+ *   npm run pool:status testnet admin Geko-Pool 2
  * 
  * Or directly:
- *   tsx src/blend/pool/set-status.ts testnet admin Test 2
+ *   tsx src/blend/pool/set-status.ts testnet admin Geko-Pool 2
  */
 
 if (process.argv.length < 5) {

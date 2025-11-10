@@ -15,10 +15,10 @@ import {
  * This makes the pool immutable - no further changes can be made to the pool configuration.
  * 
  * Usage:
- *   npm run pool:revoke-admin testnet Test newAdmin
+ *   npm run pool:revoke-admin testnet Geko-Pool newAdmin
  * 
  * Or directly:
- *   tsx src/blend/pool/revoke-admin.ts testnet Test newAdmin
+ *   tsx src/blend/pool/revoke-admin.ts testnet Geko-Pool newAdmin
  * 
  * IMPORTANT: This action is irreversible. Make sure the pool is fully configured before revoking admin.
  */
