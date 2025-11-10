@@ -286,7 +286,8 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
 /* No scroll for Send and Receive pages */
 .content-wrapper:has(.receive-page),
 .content-wrapper:has(.send-page),
-.content-wrapper:has(.envelopes-page) {
+.content-wrapper:has(.envelopes-page),
+.content-wrapper:has(.moonpay-page) {
   overflow: hidden;
   padding: 0;
   height: 100vh;
@@ -294,10 +295,27 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
 }
 
 .receive-page,
-.send-page {
+.send-page,
+.moonpay-page {
   height: 100vh;
   max-height: 100vh;
+  overflow: hidden;
 }
+
+/* Hide scrollbar in MoonPay widget */
+.moonpay-page [class*="MoonPay"] {
+  overflow: hidden !important;
+}
+
+.moonpay-page [class*="MoonPay"] * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.moonpay-page [class*="MoonPay"] *::-webkit-scrollbar {
+  display: none !important;
+}
+
 
 /* Wallet Drawer Styles */
 .wallet-modal-overlay {

@@ -71,7 +71,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
           <div className="profile-section">
             <div className="profile-info">
               <div className="profile-avatar">
-                <Icon.User01 size="xl" />
+                <Icon.Wallet03 size="xl" style={{ width: '25px', height: '25px'}} />
               </div>
               <div className="profile-details">
                 <h3>Wallet Address</h3>
