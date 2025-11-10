@@ -16,7 +16,7 @@ export interface Transaction {
   label?: string;
 }
 
-const POOL_CONTRACT_ID = (contracts as any).ids?.["Test"] as string;
+const POOL_CONTRACT_ID = (contracts as any).ids?.["Geko-Pool"] as string;
 
 export function useTransactions() {
   const { address } = useWallet();
