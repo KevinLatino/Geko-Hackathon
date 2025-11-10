@@ -7,6 +7,7 @@
     "dev": "concurrently \"stellar scaffold watch --build-clients\" \"vite\"",
     "start": "concurrently \"stellar scaffold watch --build-clients\" \"vite\"",
     "build": "tsc -b && vite build",
+    "vercel-build": "cd packages/geko_envelopes && npm install && npm run build && cd ../.. && npm add file:./packages/geko_envelopes && npm run build",
     "install:contracts": "npm install --workspace=packages && npm run build --workspace=packages",
     "preview": "vite preview",
     "lint": "eslint .",
