@@ -1,19 +1,19 @@
-import { useState } from "react";
-import "./App.module.css";
-import Navbar from "./components/Navbar.tsx";
-import ConnectAccount from "./components/ConnectAccount.tsx";
-import { Routes, Route, Outlet } from "react-router-dom";
 import { MoonPayProvider } from "@moonpay/moonpay-react";
-import Home from "./pages/Home";
-import Debugger from "./pages/Debugger.tsx";
-import Pool from "./pages/Pool.tsx";
-import Rewards from "./pages/Rewards.tsx";
+import { useState } from "react";
+import { Outlet, Route, Routes } from "react-router-dom";
+import "./App.module.css";
+import ConnectAccount from "./components/ConnectAccount.tsx";
+import FloatingChatbot from "./components/FloatingChatbot.tsx";
+import Navbar from "./components/Navbar.tsx";
 import Analytics from "./pages/Analytics.tsx";
-import Receive from "./pages/Receive.tsx";
-import Send from "./pages/Send.tsx";
-import MoonPayPage from "./pages/MoonPay.tsx";
-import EnvelopesPage from "./components/modules/envelopes/pages/EnvelopesPage.tsx";
+import Debugger from "./pages/Debugger.tsx";
 import Envelopes from "./pages/Envelopes.tsx";
+import Home from "./pages/Home";
+import MoonPayPage from "./pages/MoonPay.tsx";
+import Pool from "./pages/Pool.tsx";
+import Receive from "./pages/Receive.tsx";
+import Rewards from "./pages/Rewards.tsx";
+import Send from "./pages/Send.tsx";
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
@@ -35,6 +35,7 @@ const AppLayout: React.FC = () => {
           <Outlet />
         </div>
       </main>
+      <FloatingChatbot />
     </div>
   );
 };
@@ -66,7 +67,7 @@ function App() {
 
   if (!moonPayApiKey) {
     console.warn(
-      "MoonPay API key is missing; rendering app without MoonPay provider.",
+      "MoonPay API key is missing; rendering app without MoonPay provider."
     );
 
     return <AppRoutes />;
