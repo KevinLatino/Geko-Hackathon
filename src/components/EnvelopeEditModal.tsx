@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Icon } from "@stellar/design-system";
+import { Icon, Tooltip } from "@stellar/design-system";
 import type { Envelope } from "geko_envelopes";
 import { useEnvelopes } from "../hooks/useEnvelopes";
 import { getTokenSymbol } from "../components/modules/envelopes/utils/tokenUtils";
@@ -46,6 +46,8 @@ const EnvelopeEditModal: React.FC<EnvelopeEditModalProps> = ({
   const [amount, setAmount] = useState("");
   const [balance, setBalance] = useState<bigint | null>(null);
   const [actionType, setActionType] = useState<"deposit" | "withdraw">("deposit");
+  const [hasYield, setHasYield] = useState(false);
+  const [isYieldTooltipVisible, setIsYieldTooltipVisible] = useState(false);
 
   // Load balance when envelope changes
   React.useEffect(() => {
@@ -216,7 +218,6 @@ const EnvelopeEditModal: React.FC<EnvelopeEditModalProps> = ({
     <div className={`envelope-edit-modal ${isOpen ? "open" : ""}`}>
       {envelope && (
       <div className="envelope-edit-modal-content">
-        {/* Header */}
         <div className="envelope-edit-header">
           <div>
             <h2 className="envelope-edit-title">
@@ -231,7 +232,6 @@ const EnvelopeEditModal: React.FC<EnvelopeEditModalProps> = ({
           </button>
         </div>
 
-        {/* Envelope Info */}
         <div className="envelope-edit-info">
           <div className="envelope-edit-balance-section">
             <span className="envelope-edit-balance-label">Balance</span>
@@ -246,7 +246,47 @@ const EnvelopeEditModal: React.FC<EnvelopeEditModalProps> = ({
           </div>
         </div>
 
-        {/* Action Section */}
+        <div className="form-field" style={{ marginBottom: "24px" }}>
+          <div className="form-label-row yield-field-row">
+            <div className="yield-label-container">
+              <label className="form-label">Yield</label>
+              <div
+                onMouseEnter={() => setIsYieldTooltipVisible(true)}
+                onMouseLeave={() => setIsYieldTooltipVisible(false)}
+              >
+                <Tooltip
+                  isVisible={isYieldTooltipVisible}
+                  isContrast
+                  title="What is Yield?"
+                  placement="top"
+                  triggerEl={
+                    <div className="yield-tooltip-trigger" role="button">
+                      <Icon.InfoCircle size="sm" />
+                    </div>
+                  }
+                >
+                  <div style={{ maxWidth: "250px" }}>
+                    Yield allows your envelope to earn interest over time.
+                    When enabled, your funds will be automatically invested
+                    to generate returns.
+                  </div>
+                </Tooltip>
+              </div>
+            </div>
+            <div className="yield-switch-container">
+              <button
+                className={`yield-switch ${hasYield ? "active" : ""}`}
+                onClick={() => setHasYield(!hasYield)}
+                type="button"
+              >
+                <span
+                  className={`yield-switch-slider ${hasYield ? "active" : ""}`}
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
         <div className="envelope-edit-actions">
           <div className="envelope-edit-action-tabs">
             <button

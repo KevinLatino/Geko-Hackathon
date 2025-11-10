@@ -1278,6 +1278,7 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  padding: 0 20px;
 }
 
 .envelopes-page__header {
@@ -1534,6 +1535,36 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
 
 [class*="Tooltip"] [class*="content"] {
   color: rgba(255, 255, 255, 0.8) !important;
+}
+
+/* Remove tooltip arrow/triangle - only target arrow-specific elements */
+[class*="Tooltip"]
+  [class*="arrow"]:not([class*="content"]):not([class*="title"]),
+[class*="Tooltip"]
+  [class*="Arrow"]:not([class*="content"]):not([class*="title"]),
+[class*="Tooltip"] [class*="ArrowWrapper"],
+[class*="Tooltip"] [class*="arrow-wrapper"],
+[class*="Tooltip"] [class*="TooltipArrow"],
+[class*="Tooltip"] [class*="tooltip-arrow"] {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: none !important;
+  background: none !important;
+  content: none !important;
+}
+
+/* Hide pseudo-elements that might be the triangle, but only if they're small */
+[class*="Tooltip"]::before,
+[class*="Tooltip"]::after {
+  content: none !important;
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  border: none !important;
+  background: none !important;
 }
 
 /* Yield Switch */
@@ -1809,9 +1840,15 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
 }
 
 /* Envelopes Responsive */
+@media (max-width: 1200px) {
+  .envelopes-page {
+    padding: 0 32px;
+  }
+}
+
 @media (max-width: 1024px) {
   .envelopes-page {
-    padding: 20px;
+    padding: 0 24px;
   }
 
   .envelopes-grid {
@@ -1822,11 +1859,15 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   .envelopes-page__grid {
     grid-template-columns: 1fr;
   }
+
+  .create-envelope-section {
+    padding: 24px;
+  }
 }
 
 @media (max-width: 768px) {
   .envelopes-page {
-    padding: 16px;
+    padding: 0 16px;
   }
 
   .envelopes-page__title {
