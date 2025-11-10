@@ -1,7 +1,8 @@
 import { Icon } from "@stellar/design-system";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useWallet } from "../hooks/useWallet";
+import "./Rewards.css";
 
 interface Quest {
   id: string;
@@ -9,7 +10,7 @@ interface Quest {
   description: string;
   action: string;
   actionPath?: string;
-  nftReward: number; // NFT index (0-25)
+  nftReward: number; 
   completed: boolean;
   icon: React.ReactNode;
 }
@@ -19,88 +20,90 @@ const Rewards: React.FC = () => {
   const navigate = useNavigate();
   const [selectedQuest, setSelectedQuest] = useState<string | null>(null);
 
-  // Mock quests data - En el futuro esto vendrá de un hook o estado global
-  const [quests, setQuests] = useState<Quest[]>([
-    {
-      id: "connect-wallet",
-      title: "First Connection",
-      description: "Connect your wallet to start earning rewards",
-      action: "Connect Wallet",
-      nftReward: 0,
-      completed: !!address,
-      icon: <Icon.Wallet01 size="lg" />,
-    },
-    {
-      id: "create-envelope",
-      title: "Envelope Creator",
-      description: "Create your first envelope",
-      action: "Create Envelope",
-      actionPath: "/envelopes",
-      nftReward: 10,
-      completed: false,
-      icon: <Icon.PiggyBank02 size="lg" />,
-    },
-    {
-      id: "send-transaction",
-      title: "First Send",
-      description: "Send XLM or USDC to another wallet",
-      action: "Send Now",
-      actionPath: "/send",
-      nftReward: 11,
-      completed: false,
-      icon: <Icon.Send01 size="lg" />,
-    },
-    {
-      id: "receive-transaction",
-      title: "First Receive",
-      description: "Receive XLM or USDC in your wallet",
-      action: "View QR",
-      actionPath: "/receive",
-      nftReward: 26,
-      completed: false,
-      icon: <Icon.Receipt size="lg" />,
-    },
-    {
-      id: "buy-crypto",
-      title: "Crypto Buyer",
-      description: "Buy crypto using MoonPay",
-      action: "Buy Crypto",
-      actionPath: "/moonpay",
-      nftReward: 27,
-      completed: false,
-      icon: <Icon.CreditCard02 size="lg" />,
-    },
-    {
-      id: "pool-deposit",
-      title: "Pool Investor",
-      description: "Deposit funds into the liquidity pool",
-      action: "Invest Now",
-      actionPath: "/pool/Test",
-      nftReward: 28,
-      completed: false,
-      icon: <Icon.CoinsStacked02 size="lg" />,
-    },
-    {
-      id: "envelope-deposit",
-      title: "Envelope Saver",
-      description: "Deposit funds into an envelope",
-      action: "View Envelopes",
-      actionPath: "/envelopes",
-      nftReward: 29,
-      completed: false,
-      icon: <Icon.PiggyBank02 size="lg" />,
-    },
-    {
-      id: "multiple-envelopes",
-      title: "Envelope Master",
-      description: "Create 3 or more envelopes",
-      action: "Create More",
-      actionPath: "/envelopes",
-      nftReward: 30,
-      completed: false,
-      icon: <Icon.PiggyBank02 size="lg" />,
-    },
-  ]);
+  const quests = useMemo<Quest[]>(
+    () => [
+      {
+        id: "connect-wallet",
+        title: "First Connection",
+        description: "Connect your wallet to start earning rewards",
+        action: "Connect Wallet",
+        nftReward: 0,
+        completed: !!address,
+        icon: <Icon.Wallet01 size="lg" />,
+      },
+      {
+        id: "create-envelope",
+        title: "Envelope Creator",
+        description: "Create your first envelope",
+        action: "Create Envelope",
+        actionPath: "/envelopes",
+        nftReward: 10,
+        completed: false,
+        icon: <Icon.PiggyBank02 size="lg" />,
+      },
+      {
+        id: "send-transaction",
+        title: "First Send",
+        description: "Send XLM or USDC to another wallet",
+        action: "Send Now",
+        actionPath: "/send",
+        nftReward: 11,
+        completed: false,
+        icon: <Icon.Send01 size="lg" />,
+      },
+      {
+        id: "receive-transaction",
+        title: "First Receive",
+        description: "Receive XLM or USDC in your wallet",
+        action: "View QR",
+        actionPath: "/receive",
+        nftReward: 26,
+        completed: false,
+        icon: <Icon.Receipt size="lg" />,
+      },
+      {
+        id: "buy-crypto",
+        title: "Crypto Buyer",
+        description: "Buy crypto using MoonPay",
+        action: "Buy Crypto",
+        actionPath: "/moonpay",
+        nftReward: 27,
+        completed: false,
+        icon: <Icon.CreditCard02 size="lg" />,
+      },
+      {
+        id: "pool-deposit",
+        title: "Pool Investor",
+        description: "Deposit funds into the liquidity pool",
+        action: "Invest Now",
+        actionPath: "/pool/Test",
+        nftReward: 28,
+        completed: false,
+        icon: <Icon.CoinsStacked02 size="lg" />,
+      },
+      {
+        id: "envelope-deposit",
+        title: "Envelope Saver",
+        description: "Deposit funds into an envelope",
+        action: "View Envelopes",
+        actionPath: "/envelopes",
+        nftReward: 29,
+        completed: false,
+        icon: <Icon.PiggyBank02 size="lg" />,
+      },
+      {
+        id: "multiple-envelopes",
+        title: "Envelope Master",
+        description: "Create 3 or more envelopes",
+        action: "Create More",
+        actionPath: "/envelopes",
+        nftReward: 30,
+        completed: false,
+        icon: <Icon.PiggyBank02 size="lg" />,
+      },
+    ],
+    [address],
+  );
 
   const handleQuestClick = (quest: Quest) => {
     if (quest.completed) {
@@ -115,126 +118,78 @@ const Rewards: React.FC = () => {
   const progressPercentage = (completedQuests / totalQuests) * 100;
 
   return (
-    <div className="rewards-page min-h-screen p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex items-center gap-4 mb-4">
-            <div>
-              <h1 className="text-4xl font-bold text-white mb-2">
-                Rewards & Quests
-              </h1>
-              <p className="text-white/60">
-                Complete quests to earn exclusive NFTs
-              </p>
-            </div>
-          </div>
-
-          {/* Progress Bar */}
-          <div className="bg-[#202020] rounded-2xl p-6 border border-[#333333]">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-white font-semibold">Overall Progress</span>
-              <span className="text-white/60">
-                {completedQuests} / {totalQuests} completed
-              </span>
-            </div>
-            <div className="w-full h-3 bg-[#0a0a0a] rounded-full overflow-hidden">
-              <div
-                className="h-full transition-all duration-500 ease-out"
-                style={{
-                  width: `${progressPercentage}%`,
-                  background:
-                    "linear-gradient(135deg, #00BBFF 0%, #0051FF 100%)",
-                }}
-              />
-            </div>
+    <div className="rewards-page">
+      <div className="rewards-container">
+        <div className="rewards-header">
+          <div className="rewards-header-text">
+            <h1 className="rewards-title">Rewards & Quests</h1>
+            <p className="rewards-subtitle">
+              Complete quests to earn exclusive NFTs
+            </p>
           </div>
         </div>
 
-        {/* Quests Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="rewards-progress-card">
+          <div className="rewards-progress-header">
+            <span className="rewards-progress-title">Overall Progress</span>
+            <span className="rewards-progress-summary">
+              {completedQuests} / {totalQuests} completed
+            </span>
+          </div>
+          <div className="rewards-progress-track">
+            <div
+              className="rewards-progress-fill"
+              style={{ width: `${progressPercentage}%` }}
+            />
+          </div>
+        </div>
+
+        <div className="rewards-grid">
           {quests.map((quest) => (
             <div
               key={quest.id}
-              className={`rewards-quest-card bg-[#202020] rounded-2xl overflow-hidden border border-[#333333] cursor-pointer transition-all duration-300 hover:border-[#444444] hover:shadow-lg ${
-                quest.completed ? "border-green-500/50" : ""
-              } ${selectedQuest === quest.id ? "ring-2 ring-blue-500" : ""}`}
+              className={`rewards-quest-card ${
+                quest.completed ? "completed" : ""
+              } ${selectedQuest === quest.id ? "selected" : ""}`}
               onClick={() => handleQuestClick(quest)}
             >
-              {/* Image Section with Overlay */}
-              <div className="relative w-full aspect-square overflow-hidden">
-                {/* NFT Image */}
+              <div className="rewards-card-image">
                 <img
                   src={`/nfts/${quest.nftReward}.png`}
                   alt={`NFT ${quest.nftReward}`}
-                  className="w-full h-full object-cover"
+                  className="rewards-card-image-src"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = "none";
                   }}
                 />
-
-                {/* Overlay Gradient */}
-
-                {/* Top Badges */}
-                <div className="absolute top-3 left-3 right-3 flex items-start justify-between z-10">
-                  {quest.completed ? (
-                    <div className="px-3 py-1.5 bg-green-500/90 backdrop-blur-sm text-green-100 text-xs font-bold rounded-full border border-green-400/50">
-                      Completed
-                    </div>
-                  ) : (
-                    <div className="px-3 py-1.5 bg-blue-500/90 backdrop-blur-sm text-blue-100 text-xs font-bold rounded-full border border-blue-400/50">
-                      Active
-                    </div>
-                  )}
-                  <div className="w-8 h-8 rounded-lg bg-black/40 backdrop-blur-sm border border-white/20 flex items-center justify-center">
-                    {quest.completed ? (
-                      <Icon.CheckCircle size="sm" className="text-green-400" />
-                    ) : (
-                      <div className="text-white/80">{quest.icon}</div>
-                    )}
-                  </div>
-                </div>
               </div>
 
-              {/* Bottom Details Section */}
-              <div className="p-4 bg-[#1a1a1a]">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-white/50 text-xs mb-1">NFT Reward</p>
-                    <p className="text-white font-semibold text-sm">
+              <div className="rewards-card-details">
+                <div className="rewards-card-meta">
+                  <div className="rewards-card-meta-group">
+                    <p className="rewards-card-meta-label">NFT Reward</p>
+                    <p className="rewards-card-meta-value">
                       NFT #{quest.nftReward}
                     </p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-white/50 text-xs mb-1">Status</p>
+                  <div className="rewards-card-meta-group align-right">
+                    <p className="rewards-card-status-label">Status</p>
                     <p
-                      className={`text-xs font-semibold ${
-                        quest.completed ? "text-green-400" : "text-blue-400"
+                      className={`rewards-card-status ${
+                        quest.completed ? "completed" : ""
                       }`}
                     >
-                      {quest.completed ? "Claimed" : "Available"}
+                      {quest.completed ? "Completed" : "Available"}
                     </p>
                   </div>
                 </div>
 
-                {/* Action Button */}
+                <p className="rewards-card-description">{quest.description}</p>
+
                 {!quest.completed && quest.actionPath && (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(quest.actionPath!);
-                    }}
-                    className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-all duration-200 flex items-center justify-center gap-2 text-sm"
-                  >
+                  <div className="rewards-card-action">
                     <span>{quest.action}</span>
                     <Icon.ArrowRight size="sm" />
-                  </button>
-                )}
-
-                {quest.completed && (
-                  <div className="w-full py-2.5 px-4 bg-green-500/20 text-green-400 font-semibold rounded-lg flex items-center justify-center gap-2 text-sm">
-                    <Icon.CheckCircle size="sm" />
-                    <span>Quest Completed</span>
                   </div>
                 )}
               </div>
@@ -242,13 +197,12 @@ const Rewards: React.FC = () => {
           ))}
         </div>
 
-        {/* Selected Quest Details Modal */}
         {selectedQuest && (
-          <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-[#202020] rounded-2xl p-8 max-w-md w-full border border-[#333333] relative">
+          <div className="rewards-modal-backdrop">
+            <div className="rewards-modal">
               <button
                 onClick={() => setSelectedQuest(null)}
-                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#333333] hover:bg-[#444444] flex items-center justify-center text-white transition-all"
+                className="rewards-modal-close"
               >
                 <Icon.XClose size="md" />
               </button>
@@ -259,31 +213,30 @@ const Rewards: React.FC = () => {
 
                 return (
                   <>
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center">
-                        <Icon.Trophy01 size="xl" className="text-green-400" />
+                    <div className="rewards-modal-header">
+                      <div className="rewards-modal-icon">
+                        <Icon.Trophy01 size="xl" className="rewards-icon" />
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-white mb-1">
-                          {quest.title}
-                        </h2>
-                        <p className="text-green-400 text-sm font-semibold">
+                        <h2 className="rewards-modal-title">{quest.title}</h2>
+                        <p className="rewards-modal-subtitle">
                           Quest Completed!
                         </p>
                       </div>
                     </div>
 
-                    <div className="mb-6">
-                      <p className="text-white/80 mb-4">{quest.description}</p>
-                      <div className="bg-[#0a0a0a] rounded-xl p-4 border border-[#333333]">
-                        <p className="text-white/60 text-sm mb-2">
+                    <div className="rewards-modal-body">
+                      <p className="rewards-modal-description">
+                        {quest.description}
+                      </p>
+                      <div className="rewards-modal-reward">
+                        <p className="rewards-modal-reward-label">
                           Your NFT Reward
                         </p>
-                        <div className="w-full aspect-square rounded-lg overflow-hidden">
+                        <div className="rewards-modal-reward-image">
                           <img
                             src={`/nfts/${quest.nftReward}.png`}
                             alt={`NFT ${quest.nftReward}`}
-                            className="w-full h-full object-cover"
                             onError={(e) => {
                               (e.target as HTMLImageElement).style.display =
                                 "none";
@@ -295,7 +248,7 @@ const Rewards: React.FC = () => {
 
                     <button
                       onClick={() => setSelectedQuest(null)}
-                      className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-all duration-200"
+                      className="rewards-modal-button"
                     >
                       Close
                     </button>

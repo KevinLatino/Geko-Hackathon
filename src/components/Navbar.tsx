@@ -29,6 +29,16 @@ const Navbar: React.FC<NavbarProps> = ({
       label: "Home",
     },
     {
+      path: "/rewards",
+      icon: <Icon.Trophy01 size="lg" />,
+      label: "Rewards",
+    },
+    {
+      path: "/envelopes",
+      icon: <Icon.PiggyBank02 size="lg" />,
+      label: "Envelopes",
+    },
+    {
       path: "/pool/Test",
       icon: <Icon.CoinsStacked02 size="lg" />,
       label: "Pool",
@@ -37,16 +47,6 @@ const Navbar: React.FC<NavbarProps> = ({
       path: "/moonpay",
       icon: <Icon.CreditCard02 size="lg" />,
       label: "Buy Crypto",
-    },
-    {
-      path: "/envelopes",
-      icon: <Icon.PiggyBank02 size="lg" />,
-      label: "Envelopes",
-    },
-    {
-      path: "/rewards",
-      icon: <Icon.Trophy01 size="lg" />,
-      label: "Rewards",
     },
   ];
 
