@@ -10,6 +10,7 @@ import Debugger from "./pages/Debugger.tsx";
 import Envelopes from "./pages/Envelopes.tsx";
 import Home from "./pages/Home";
 import MoonPayPage from "./pages/MoonPay.tsx";
+import NFTMint from "./pages/NFTMint.tsx";
 import Pool from "./pages/Pool.tsx";
 import Receive from "./pages/Receive.tsx";
 import Rewards from "./pages/Rewards.tsx";
@@ -57,6 +58,7 @@ const AppRoutes = () => (
       <Route path="/analytics" element={<Analytics />} />
       <Route path="/moonpay" element={<MoonPayPage />} />
       <Route path="/envelopes" element={<Envelopes />} />
+      <Route path="/nft-mint" element={<NFTMint />} />
       <Route path="/debug" element={<Debugger />} />
       <Route path="/debug/:contractName" element={<Debugger />} />
     </Route>
