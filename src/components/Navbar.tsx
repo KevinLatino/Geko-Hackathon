@@ -1,16 +1,21 @@
 import { Icon } from "@stellar/design-system";
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
+import ProfileModal from "./ProfileModal";
 import WalletModal from "./WalletModal";
 
 interface NavbarProps {
   isWalletDrawerOpen: boolean;
   setIsWalletDrawerOpen: (isOpen: boolean) => void;
+  isProfileModalOpen: boolean;
+  setIsProfileModalOpen: (isOpen: boolean) => void;
 }
 
 const Navbar: React.FC<NavbarProps> = ({
   isWalletDrawerOpen,
   setIsWalletDrawerOpen,
+  isProfileModalOpen,
+  setIsProfileModalOpen,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -111,11 +116,27 @@ const Navbar: React.FC<NavbarProps> = ({
             </NavLink>
           ))}
         </div>
+
+        <div className="navbar-profile">
+          <button
+            className="navbar-profile-btn"
+            onClick={() => setIsProfileModalOpen(true)}
+            title="Profile"
+          >
+            <Icon.User01 size="lg" />
+            <span className="navbar-item-label">Profile</span>
+          </button>
+        </div>
       </nav>
 
       <WalletModal
         isOpen={isWalletDrawerOpen}
         onClose={() => setIsWalletDrawerOpen(false)}
+      />
+
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
       />
     </>
   );

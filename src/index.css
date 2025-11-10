@@ -242,6 +242,10 @@ td {
   margin-left: 540px;
 }
 
+.app-layout.profile-open .main-content {
+  margin-left: 540px;
+}
+
 .top-bar {
   height: 70px;
   background-color: #0a0a0a;
@@ -328,7 +332,15 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
     width: 380px;
   }
 
+  .profile-modal {
+    width: 380px;
+  }
+
   .app-layout.drawer-open .main-content {
+    margin-left: 460px;
+  }
+
+  .app-layout.profile-open .main-content {
     margin-left: 460px;
   }
 }
@@ -339,7 +351,16 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
     left: 0;
   }
 
+  .profile-modal {
+    width: 100vw;
+    left: 0;
+  }
+
   .app-layout.drawer-open .main-content {
+    margin-left: 100vw;
+  }
+
+  .app-layout.profile-open .main-content {
     margin-left: 100vw;
   }
 
@@ -358,6 +379,10 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   }
 
   .wallet-modal {
+    left: 0;
+  }
+
+  .profile-modal {
     left: 0;
   }
 }
@@ -1025,6 +1050,10 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
     margin-left: 0 !important;
   }
 
+  .app-layout.profile-open .main-content {
+    margin-left: 0 !important;
+  }
+
   .content-wrapper {
     padding: 16px;
   }
@@ -1049,6 +1078,24 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   }
 
   .wallet-modal.open {
+    right: 0;
+  }
+
+  /* Profile Modal - Full screen on mobile */
+  .profile-modal {
+    position: fixed;
+    left: auto;
+    right: -100%;
+    top: 60px;
+    width: 100%;
+    height: calc(100vh - 60px);
+    border-radius: 0;
+    border-right: none;
+    transition: right 0.3s ease-in-out;
+    z-index: 998;
+  }
+
+  .profile-modal.open {
     right: 0;
   }
 
@@ -2046,4 +2093,461 @@ body:has(.envelope-edit-modal.open) .content-wrapper {
   body:has(.envelope-edit-modal.open) .content-wrapper {
     margin-right: 0;
   }
+}
+
+/* Profile Modal */
+.profile-modal {
+  position: fixed;
+  left: 80px;
+  top: 0;
+  width: 460px;
+  height: 100vh;
+  background-color: #202020;
+  z-index: 999;
+  overflow-y: hidden;
+  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.3);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease-in-out;
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+.profile-modal.open {
+  transform: translateX(0);
+}
+
+.profile-modal-content {
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Hide or make scrollbar smaller for Profile Modal Content */
+.profile-modal-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.profile-modal-content::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 2px;
+}
+
+.profile-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.profile-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.profile-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-modal-header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profile-modal-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.profile-modal-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.profile-modal-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+.profile-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.profile-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.profile-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-details h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.profile-address {
+  font-size: 14px;
+  font-weight: 500;
+  color: #ffffff;
+  margin: 0;
+  word-break: break-all;
+  font-family: monospace;
+}
+
+.profile-section-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+}
+
+.profile-section-toggle-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.profile-section-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 1;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 16px;
+  transition: all 0.2s ease;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+}
+
+.profile-section-toggle:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-chevron {
+  color: rgba(255, 255, 255, 0.6);
+  transition: transform 0.3s ease;
+}
+
+.profile-chevron.expanded {
+  transform: rotate(180deg);
+}
+
+.profile-nfts-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.profile-nfts-gallery.opening {
+  animation: slideDown 0.3s ease-out forwards;
+}
+
+.profile-nfts-gallery.closing {
+  animation: slideUp 0.3s ease-in forwards;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    max-height: 320px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 1;
+    max-height: 320px;
+    padding-top: 16px;
+    padding-bottom: 16px;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    max-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    transform: translateY(-10px);
+  }
+}
+
+.profile-nft-item {
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile-nft-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-nft-item.selected {
+  border: 2px solid #2563eb;
+  box-shadow:
+    0 0 0 2px rgba(37, 99, 235, 0.3),
+    0 8px 16px rgba(0, 0, 0, 0.3);
+}
+
+.profile-nft-selected-indicator {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #2563eb;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+}
+
+.profile-mint-nft-btn {
+  padding: 16px 24px;
+  background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+  border: none;
+  border-radius: 12px;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.profile-mint-nft-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.4);
+}
+
+.profile-mint-nft-btn:active {
+  transform: translateY(0);
+}
+
+.profile-nft-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Scrollbar for NFTs gallery - Hidden or very small */
+.profile-nfts-gallery::-webkit-scrollbar {
+  width: 4px;
+}
+
+.profile-nfts-gallery::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 2px;
+}
+
+.profile-nfts-gallery::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.profile-nfts-gallery::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Hide scrollbar for Firefox */
+.profile-nfts-gallery {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+.profile-settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.profile-setting-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  width: 100%;
+}
+
+.profile-setting-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.profile-setting-item span {
+  flex: 1;
+}
+
+.profile-disconnect-btn {
+  color: #ff3b30 !important;
+}
+
+.profile-disconnect-btn:hover {
+  background: rgba(255, 59, 48, 0.1) !important;
+  border-color: rgba(255, 59, 48, 0.3) !important;
+}
+
+.profile-disconnect-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.profile-disconnect-btn svg {
+  color: #ff3b30 !important;
+}
+
+.profile-about {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.profile-about p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 14px;
+}
+
+.profile-version {
+  color: rgba(255, 255, 255, 0.5) !important;
+  font-size: 12px !important;
+}
+
+/* Navbar Profile Button */
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  justify-content: center;
+}
+
+.navbar-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.08);
+  border: none;
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  width: 52px;
+  height: 52px;
+  justify-content: center;
+}
+
+.navbar-profile-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.navbar-profile-btn svg {
+  color: #ffffff !important;
 }

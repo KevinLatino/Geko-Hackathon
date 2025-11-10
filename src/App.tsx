@@ -17,12 +17,15 @@ import Send from "./pages/Send.tsx";
 
 const AppLayout: React.FC = () => {
   const [isWalletDrawerOpen, setIsWalletDrawerOpen] = useState(true);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   return (
-    <div className={`app-layout ${isWalletDrawerOpen ? "drawer-open" : ""}`}>
+    <div className={`app-layout ${isWalletDrawerOpen ? "drawer-open" : ""} ${isProfileModalOpen ? "profile-open" : ""}`}>
       <Navbar
         isWalletDrawerOpen={isWalletDrawerOpen}
         setIsWalletDrawerOpen={setIsWalletDrawerOpen}
+        isProfileModalOpen={isProfileModalOpen}
+        setIsProfileModalOpen={setIsProfileModalOpen}
       />
       <main className="main-content">
         <div className="top-bar">
