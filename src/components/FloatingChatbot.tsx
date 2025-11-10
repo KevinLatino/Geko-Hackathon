@@ -1,8 +1,15 @@
 import { Icon } from "@stellar/design-system";
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import "./FloatingChatbot.css";
 
 const FloatingChatbot: React.FC = () => {
+  const location = useLocation();
+
+  // Don't show chatbot on Home page
+  if (location.pathname === "/") {
+    return null;
+  }
   const [isOpen, setIsOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [isOpening, setIsOpening] = useState(false);

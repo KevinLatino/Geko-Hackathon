@@ -2,7 +2,6 @@ import { Icon } from "@stellar/design-system";
 import { useNavigate } from "react-router-dom";
 import { LiquidBackgroundLayout } from "../components/layout/liquid-background-layout";
 import HeaderText from "../components/ui/HeaderText";
-import FloatingChatbot from "../components/FloatingChatbot";
 import { useWallet } from "../hooks/useWallet";
 import { connectWallet } from "../util/wallet";
 
@@ -44,7 +43,6 @@ export default function Home() {
           </div>
         </div>
       </LiquidBackgroundLayout>
-      <FloatingChatbot />
     </>
   );
 }
