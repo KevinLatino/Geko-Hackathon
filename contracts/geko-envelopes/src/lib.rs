@@ -4,9 +4,7 @@ mod errors;
 mod storage;
 mod types;
 
-use soroban_sdk::{
-    contract, contractevent, contractimpl, panic_with_error, token, Address, Env, Symbol, Vec,
-};
+use soroban_sdk::{contract, contractevent, contractimpl, panic_with_error, token, Address, Env, String, Vec};
 
 use crate::errors::Error;
 use crate::types::Envelope;
@@ -45,7 +43,7 @@ mod pool {
 pub struct EnvelopeCreated {
     pub user: Address,
     pub id: u64,
-    pub name: Symbol,
+    pub name: String,
     pub token_contract: Address,
     pub pool_contract: Address,
 }
@@ -94,17 +92,10 @@ pub struct GekoEnvelopes;
 #[contractimpl]
 impl GekoEnvelopes {
     /// Create a new envelope associated with the user and the token contract.
-    pub fn create(
-        env: Env,
-        user: Address,
-        name: Symbol,
-        description: Symbol,
-        token_contract: Address,
-        pool_contract: Address,
-    ) -> u64 {
+    pub fn create(env: Env, user: Address, name: String, description: String, token_contract: Address, pool_contract: Address) -> u64 {
         user.require_auth();
 
-        if name == Symbol::new(&env, "") {
+        if name.len() == 0 {
             panic_with_error!(&env, Error::InvalidInput);
         }
 

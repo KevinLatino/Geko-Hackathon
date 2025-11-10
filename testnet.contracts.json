@@ -16,7 +16,7 @@
     "TestnetV2": "CDDG7DLOWSHRYQ2HWGZEZ4UTR7LPTKFFHN3QUCSZEXOWOPARMONX6T65",
     "Geko-Pool": "CB7XWRL5YR7A5WEUVGEWUWT46O2ESYNWM2QIQR5AYN7PDYO47R743NVY",
     "GEKO-NFT": "CBVMUCF3RA4QYPPG4YFG6T2RNSLAX2AH4UUHX5W2WO2657KNDQTFTE6D",
-    "Geko-Envelopes": "CCTQWDRWOP3IFGHZJJ42PZF5TOP27KB2WDFURK4Q7ZT7LOWLMQ3U7BCM"
+    "Geko-Envelopes": "CD5JIH7M766UASULUTW2373QJ75V54RXPYYZRL2AKSRC5K2SQGP3XVVM"
   },
   "hashes": {
     "comet": "8abc28913035c07411ed5d134e6bfeab4723d97ddd4d1a22a0605d35c94d1a36",
@@ -26,24 +26,5 @@
     "backstopV2": "c1f4502a757e25c611f5a159bc1ab0eef64085adac6c68123dca66e87faffbc2",
     "lendingPoolV2": "a41fc53d6753b6c04eb15b021c55052366a4c8e0e21bc72700f461264ec1350e",
     "emitter": "438a5528cff17ede6fe515f095c43c5f15727af17d006971485e52462e7e7b89"
-  },
-  "descriptions": {
-    "XLM": "Soroban wrapper for native XLM so contracts can treat it as a fungible token.",
-    "BLND": "Blend governance / reward token used across the lending ecosystem.",
-    "GEKO": "Fungible Geko utility token for rewards, staking, and incentives.",
-    "USDC": "Wrapped USDC stablecoin available on Stellar testnet.",
-    "wETH": "Wrapped Ethereum asset for cross-asset experiments.",
-    "wBTC": "Wrapped Bitcoin asset used as an additional reserve.",
-    "cometFactory": "Factory contract that deploys Blend Comet strategy instances.",
-    "comet": "Deployed Comet strategy referenced by Blend automation.",
-    "oracle": "Price oracle providing reserve prices to the Blend pool.",
-    "oraclemock": "Oracle mock; mirrors the oracle address for testing scenarios.",
-    "emitter": "Emission distributor responsible for reward flows in the Blend pool.",
-    "poolFactoryV2": "Factory that can instantiate new Blend V2 lending pools.",
-    "backstopV2": "Backstop module absorbing bad debt and taking a fee from interest.",
-    "TestnetV2": "Reference Blend pool deployment used as baseline / template.",
-    "Geko-Pool": "Custom Blend pool for Geko (reserves: XLM, USDC, GEKO).",
-    "GEKO-NFT": "Geko NFT collection contract (25-slot edition).",
-    "Geko-Envelopes": "Envelope manager that routes deposits/withdrawals through the Blend pool."
   }
 }

@@ -14,7 +14,7 @@ import { useWallet } from "../hooks/useWallet";
 import { useWalletBalance } from "../hooks/useWalletBalance";
 import { getUSDCIssuer } from "../util/assets";
 
-const POOL_NAME = "Test";
+const POOL_NAME = "Geko-Pool";
 const XLM_ID = (contracts as any).ids?.["XLM"] as string;
 const USDC_ID = (contracts as any).ids?.["USDC"] as string;
 

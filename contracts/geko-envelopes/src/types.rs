@@ -1,11 +1,11 @@
-use soroban_sdk::{contracttype, Address, Symbol};
+use soroban_sdk::{contracttype, Address, String};
 
 #[derive(Clone)]
 #[contracttype]
 pub struct Envelope {
     pub id: u64,
-    pub name: Symbol,
-    pub description: Symbol,
+    pub name: String,
+    pub description: String,
     pub balance: i128,
     pub token_contract: Address,
     pub pool_contract: Address,
