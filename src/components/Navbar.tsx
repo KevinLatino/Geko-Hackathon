@@ -1,4 +1,4 @@
-import { Icon } from "@stellar/design-system";
+import { Icon, Tooltip } from "@stellar/design-system";
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import ProfileModal from "./ProfileModal";
@@ -18,6 +18,7 @@ const Navbar: React.FC<NavbarProps> = ({
   setIsProfileModalOpen,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [tooltipStates, setTooltipStates] = useState<Record<string, boolean>>({});
 
   const navItems = [
     {
@@ -85,47 +86,83 @@ const Navbar: React.FC<NavbarProps> = ({
         className={`navbar-container ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}
       >
         <div className="navbar-logo desktop-only">
-          <button
-            className="logo-icon"
-            onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
-            title={isWalletDrawerOpen ? "Close Wallet" : "Open Wallet"}
+          <div
+            onMouseEnter={() => setTooltipStates({ ...tooltipStates, wallet: true })}
+            onMouseLeave={() => setTooltipStates({ ...tooltipStates, wallet: false })}
           >
-            {isWalletDrawerOpen ? (
-              <Icon.ChevronLeft size="md" />
-            ) : (
-              <Icon.ChevronRight size="md" />
-            )}
-          </button>
+            <Tooltip
+              isVisible={tooltipStates.wallet}
+              isContrast
+              title={isWalletDrawerOpen ? "Close Wallet" : "Open Wallet"}
+              placement="right"
+              triggerEl={
+                <button
+                  className="logo-icon"
+                  onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
+                >
+                  {isWalletDrawerOpen ? (
+                    <Icon.ChevronLeft size="md" />
+                  ) : (
+                    <Icon.ChevronRight size="md" />
+                  )}
+                </button>
+              }
+            />
+          </div>
         </div>
 
         <div className="navbar-divider desktop-only" />
 
         <div className="navbar-items">
           {navItems.map((item) => (
-            <NavLink
+            <div
               key={item.path}
-              to={item.path}
-              className={({ isActive }) =>
-                `navbar-item ${isActive ? "navbar-item-active" : ""}`
-              }
-              title={item.label}
-              onClick={handleNavClick}
+              onMouseEnter={() => setTooltipStates({ ...tooltipStates, [item.path]: true })}
+              onMouseLeave={() => setTooltipStates({ ...tooltipStates, [item.path]: false })}
             >
-              {item.icon}
-              <span className="navbar-item-label">{item.label}</span>
-            </NavLink>
+              <Tooltip
+                isVisible={tooltipStates[item.path]}
+                isContrast
+                title={item.label}
+                placement="right"
+                triggerEl={
+                  <NavLink
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `navbar-item ${isActive ? "navbar-item-active" : ""}`
+                    }
+                    onClick={handleNavClick}
+                  >
+                    {item.icon}
+                    <span className="navbar-item-label">{item.label}</span>
+                  </NavLink>
+                }
+              />
+            </div>
           ))}
         </div>
 
         <div className="navbar-profile">
-          <button
-            className="navbar-profile-btn"
-            onClick={() => setIsProfileModalOpen(true)}
-            title="Profile"
+          <div
+            onMouseEnter={() => setTooltipStates({ ...tooltipStates, profile: true })}
+            onMouseLeave={() => setTooltipStates({ ...tooltipStates, profile: false })}
           >
-            <Icon.User01 size="lg" />
-            <span className="navbar-item-label">Profile</span>
-          </button>
+            <Tooltip
+              isVisible={tooltipStates.profile}
+              isContrast
+              title="Profile"
+              placement="right"
+              triggerEl={
+                <button
+                  className="navbar-profile-btn"
+                  onClick={() => setIsProfileModalOpen(true)}
+                >
+                  <Icon.User01 size="lg" />
+                  <span className="navbar-item-label">Profile</span>
+                </button>
+              }
+            />
+          </div>
         </div>
       </nav>
 

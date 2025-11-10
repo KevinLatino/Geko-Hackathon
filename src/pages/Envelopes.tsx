@@ -47,7 +47,6 @@ export default function EnvelopesPage() {
   const {
     loading,
     createEnvelope,
-    createEnvelopeWithDeposit,
     listEnvelopes,
     deposit,
   } = useEnvelopes(CONTRACT_ID);
@@ -230,36 +229,51 @@ export default function EnvelopesPage() {
           return;
         }
 
-        // Create envelope with or without initial deposit
-        if (initialAmount.trim()) {
-          // Use create_with_deposit for a single transaction
-          const amount = parseFloat(initialAmount);
-          const tx = await createEnvelopeWithDeposit(
-            formattedName,
-            formattedDescription,
-            tokenContract,
-            BigInt(Math.round(amount * 10000000))
-          );
-          const hash = tx?.sendTransactionResponse?.hash;
+        // Create envelope first
+        const createTx = await createEnvelope(
+          formattedName,
+          formattedDescription,
+          tokenContract
+        );
+        const createHash = createTx?.sendTransactionResponse?.hash;
 
-          if (hash) {
+        if (!createHash) {
+          addNotification("Error creating envelope", "error");
+          return;
+        }
+
+        // If there's an initial amount, deposit it after creation
+        if (initialAmount.trim()) {
+          const amount = parseFloat(initialAmount);
+          
+          // Wait a bit for the envelope to be created on-chain
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          
+          // Refresh envelopes list to get the new envelope ID
+          await refreshEnvelopesList();
+          
+          // Find the newly created envelope by name (in snake_case)
+          // Use a fresh list from listEnvelopes to ensure we have the latest data
+          const freshEnvelopes = await listEnvelopes();
+          const newEnvelope = freshEnvelopes.find(
+            (env) => env.name === formattedName
+          );
+
+          if (newEnvelope) {
+            // Make the deposit
+            await deposit(
+              newEnvelope.id,
+              BigInt(Math.round(amount * 10000000))
+            );
+            addNotification("Envelope created and initial deposit successful!", "success");
+          } else {
             addNotification(
-              "Envelope created and initial deposit successful!",
-              "success"
+              "Envelope created but could not find it for deposit. Please deposit manually.",
+              "warning"
             );
           }
         } else {
-          // Use regular create if no initial amount
-          const tx = await createEnvelope(
-            formattedName,
-            formattedDescription,
-            tokenContract
-          );
-          const hash = tx?.sendTransactionResponse?.hash;
-
-          if (hash) {
-            addNotification("Envelope created successfully!", "success");
-          }
+          addNotification("Envelope created successfully!", "success");
         }
 
         // Reset form
