@@ -8,6 +8,7 @@ pub struct Envelope {
     pub description: Symbol,
     pub balance: i128,
     pub token_contract: Address,
+    pub pool_contract: Address,
 }
 
 #[derive(Clone)]

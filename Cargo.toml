@@ -2,7 +2,7 @@
 members = [
     "contracts/geko-token",
     "contracts/geko-nft",
-    "contracts/geko_envelopes",
+    "contracts/geko-envelopes",
 ]
 resolver = "2"
 
