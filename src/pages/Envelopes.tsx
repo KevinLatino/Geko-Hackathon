@@ -44,12 +44,8 @@ interface EnvelopeWithDate extends Envelope {
 
 export default function EnvelopesPage() {
   const { address, isPending, triggerCurrencyChange } = useWallet();
-  const {
-    loading,
-    createEnvelope,
-    listEnvelopes,
-    deposit,
-  } = useEnvelopes(CONTRACT_ID);
+  const { loading, createEnvelope, listEnvelopes, deposit } =
+    useEnvelopes(CONTRACT_ID);
   const { balances } = useWalletBalance();
   const { addNotification } = useNotification();
 
@@ -245,13 +241,13 @@ export default function EnvelopesPage() {
         // If there's an initial amount, deposit it after creation
         if (initialAmount.trim()) {
           const amount = parseFloat(initialAmount);
-          
+
           // Wait a bit for the envelope to be created on-chain
-          await new Promise(resolve => setTimeout(resolve, 2000));
-          
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+
           // Refresh envelopes list to get the new envelope ID
           await refreshEnvelopesList();
-          
+
           // Find the newly created envelope by name (in snake_case)
           // Use a fresh list from listEnvelopes to ensure we have the latest data
           const freshEnvelopes = await listEnvelopes();
@@ -265,7 +261,10 @@ export default function EnvelopesPage() {
               newEnvelope.id,
               BigInt(Math.round(amount * 10000000))
             );
-            addNotification("Envelope created and initial deposit successful!", "success");
+            addNotification(
+              "Envelope created and initial deposit successful!",
+              "success"
+            );
           } else {
             addNotification(
               "Envelope created but could not find it for deposit. Please deposit manually.",
