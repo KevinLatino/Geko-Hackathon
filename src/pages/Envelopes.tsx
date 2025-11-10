@@ -287,6 +287,20 @@ export default function EnvelopesPage() {
       } catch (e) {
         console.error(e);
         const errorMessage = e instanceof Error ? e.message : "Unknown error";
+        const normalizedMessage = errorMessage.toLowerCase();
+        const isBalanceError =
+          normalizedMessage.includes("resulting balance is not within the allowed range") ||
+          normalizedMessage.includes("error(contract, #10)");
+
+        if (isBalanceError) {
+          addNotification(
+            "We couldn’t create the envelope with an initial deposit. Confirm your wallet has enough balance for this asset and the trustline/allowance is enabled.",
+            "error",
+            true
+          );
+          return;
+        }
+
         addNotification(`Error creating envelope: ${errorMessage}`, "error");
       }
     })();

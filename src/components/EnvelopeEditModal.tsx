@@ -186,6 +186,21 @@ const EnvelopeEditModal: React.FC<EnvelopeEditModalProps> = ({
     } catch (e) {
       console.error("Error depositing:", e);
       const errorMessage = e instanceof Error ? e.message : "Unknown error";
+
+      const normalizedMessage = errorMessage.toLowerCase();
+      const isBalanceError =
+        normalizedMessage.includes("resulting balance is not within the allowed range") ||
+        normalizedMessage.includes("error(contract, #10)");
+
+      if (isBalanceError) {
+        addNotification(
+          "We couldn’t complete your deposit. Check that your wallet has enough balance for this asset and that the trustline/allowance is enabled.",
+          "error",
+          true
+        );
+        return;
+      }
+
       addNotification(`Error depositing: ${errorMessage}`, "error");
     }
   };
