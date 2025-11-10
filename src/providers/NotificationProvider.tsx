@@ -1,11 +1,14 @@
+import {
+  Icon,
+  Notification as StellarNotification,
+} from "@stellar/design-system";
 import React, {
   createContext,
-  useState,
   ReactNode,
-  useMemo,
   useCallback,
+  useMemo,
+  useState,
 } from "react";
-import { Notification as StellarNotification, Icon } from "@stellar/design-system";
 import "./NotificationProvider.css"; // Import CSS for sliding effect
 
 type NotificationType =
@@ -23,11 +26,15 @@ interface Notification {
 }
 
 interface NotificationContextType {
-  addNotification: (message: string, type: NotificationType, showXCloseIcon?: boolean) => void;
+  addNotification: (
+    message: string,
+    type: NotificationType,
+    showXCloseIcon?: boolean
+  ) => void;
 }
 
 const NotificationContext = createContext<NotificationContextType | undefined>(
-  undefined,
+  undefined
 );
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
@@ -54,13 +61,13 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
         setNotifications(filterOut(newNotification.id));
       }, 5000); // Remove after 5 seconds
     },
-    [],
+    []
   );
 
   const contextValue = useMemo(() => ({ addNotification }), [addNotification]);
 
   return (
-    <NotificationContext value={contextValue}>
+    <NotificationContext.Provider value={contextValue}>
       {children}
       <div className="notification-container">
         {notifications.map((notification) => (
@@ -69,38 +76,34 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({
             className={`notification ${notification.isVisible ? "slide-in" : "slide-out"}`}
           >
             <StellarNotification
-              title={
+              title={notification.message}
+              icon={
                 notification.showXCloseIcon ? (
-                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                    <Icon.XClose size="md" color="#FF3B30" />
-                    <span>{notification.message}</span>
-                  </div>
-                ) : (
-                  notification.message
-                )
+                  <Icon.XClose size="lg" color="#FF3B30" />
+                ) : undefined
               }
               variant={notification.type}
             />
           </div>
         ))}
       </div>
-    </NotificationContext>
+    </NotificationContext.Provider>
   );
 };
 
 function markRead(
-  id: Notification["id"],
+  id: Notification["id"]
 ): React.SetStateAction<Notification[]> {
   return (prev) =>
     prev.map((notification) =>
       notification.id === id
         ? { ...notification, isVisible: true }
-        : notification,
+        : notification
     );
 }
 
 function filterOut(
-  id: Notification["id"],
+  id: Notification["id"]
 ): React.SetStateAction<Notification[]> {
   return (prev) => prev.filter((notification) => notification.id !== id);
 }
