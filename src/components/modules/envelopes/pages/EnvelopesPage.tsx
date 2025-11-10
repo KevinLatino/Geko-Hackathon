@@ -7,7 +7,6 @@ import { CreateEnvelopeForm } from "../ui/CreateEnvelopeForm";
 import { EnvelopeActions } from "../ui/EnvelopeActions";
 import { CONTRACT_ID, TOKEN_ADDRESSES } from "../constants";
 import type { Envelope } from "geko_envelopes";
-import "./EnvelopesPage.css";
 
 export default function EnvelopesPage() {
   const { address, isPending } = useWallet();
