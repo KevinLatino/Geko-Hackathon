@@ -1,15 +1,17 @@
+import { Icon } from "@stellar/design-system";
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Icon } from "@stellar/design-system";
 import WalletModal from "./WalletModal";
-import { ChevronsRight, ChevronsLeft, Menu, X } from 'lucide-react';
 
 interface NavbarProps {
   isWalletDrawerOpen: boolean;
   setIsWalletDrawerOpen: (isOpen: boolean) => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOpen }) => {
+const Navbar: React.FC<NavbarProps> = ({
+  isWalletDrawerOpen,
+  setIsWalletDrawerOpen,
+}) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -29,15 +31,10 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
       label: "Buy Crypto",
     },
     {
-      path: "/rewards",
-      icon: <Icon.Stars02 size="lg" />,
-      label: "Rewards",
+      path: "/envelopes",
+      icon: <Icon.PiggyBank02 size="lg" />,
+      label: "Envelopes",
     },
-    {
-      path: "/analytics",
-      icon: <Icon.BarChart07 size="lg" />,
-      label: "Analytics",
-    }
   ];
 
   const handleNavClick = () => {
@@ -46,37 +43,42 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
 
   return (
     <>
-      {/* Mobile Header */}
       <div className="mobile-header">
         <button
           className="mobile-menu-btn"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
-          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          {isMobileMenuOpen ? (
+            <Icon.XClose size="lg" />
+          ) : (
+            <Icon.Menu01 size="lg" />
+          )}
         </button>
-        
+
         <div className="mobile-header-title">Geko</div>
-        
+
         <button
           className="mobile-wallet-btn"
           onClick={() => setIsWalletDrawerOpen(!isWalletDrawerOpen)}
         >
           {isWalletDrawerOpen ? (
-            <ChevronsLeft size={20} />
+            <Icon.ChevronLeft size="md" />
           ) : (
-            <ChevronsRight size={20} />
+            <Icon.ChevronRight size="md" />
           )}
         </button>
       </div>
 
-      {/* Mobile Menu Overlay */}
       {isMobileMenuOpen && (
-        <div className="mobile-menu-overlay" onClick={() => setIsMobileMenuOpen(false)} />
+        <div
+          className="mobile-menu-overlay"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
       )}
 
-      {/* Desktop Navbar / Mobile Menu */}
-      <nav className={`navbar-container ${isMobileMenuOpen ? 'mobile-menu-open' : ''}`}>
-        {/* Logo - Opens Wallet Modal (Desktop only) */}
+      <nav
+        className={`navbar-container ${isMobileMenuOpen ? "mobile-menu-open" : ""}`}
+      >
         <div className="navbar-logo desktop-only">
           <button
             className="logo-icon"
@@ -84,17 +86,15 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
             title={isWalletDrawerOpen ? "Close Wallet" : "Open Wallet"}
           >
             {isWalletDrawerOpen ? (
-              <ChevronsLeft className="w-5 h-5"/>
+              <Icon.ChevronLeft size="md" />
             ) : (
-              <ChevronsRight className="w-5 h-5"/>
+              <Icon.ChevronRight size="md" />
             )}
           </button>
         </div>
 
-        {/* Divider */}
         <div className="navbar-divider desktop-only" />
 
-        {/* Navigation Items */}
         <div className="navbar-items">
           {navItems.map((item) => (
             <NavLink
@@ -113,7 +113,6 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
         </div>
       </nav>
 
-      {/* Wallet Modal */}
       <WalletModal
         isOpen={isWalletDrawerOpen}
         onClose={() => setIsWalletDrawerOpen(false)}
@@ -123,5 +122,3 @@ const Navbar: React.FC<NavbarProps> = ({ isWalletDrawerOpen, setIsWalletDrawerOp
 };
 
 export default Navbar;
-
-
