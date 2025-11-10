@@ -253,12 +253,10 @@ export default function Send() {
   return (
     <div className="send-page flex flex-col items-center justify-center h-screen px-8 overflow-hidden">
       <div className="max-w-2xl w-full flex flex-col items-center gap-8">
-        {/* Stepper */}
-        <div className="flex items-center justify-center w-full gap-4">
-          {/* Step 1 */}
-          <div className="flex flex-col items-center gap-2">
+        <div className="flex items-center justify-center w-full gap-4 mb-12">
+          <div className="flex flex-col items-center gap-4">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
                 step >= 1
                   ? step === 1
                     ? "bg-blue-600"
@@ -269,10 +267,10 @@ export default function Send() {
               <Icon.Wallet01
                 size="lg"
                 color="#FFFFFF"
-                style={{ width: "28px", height: "28px" }}
+                style={{ width: "24px", height: "24px" }}
               />
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col gap-3">
               <p className="text-xs text-white/60">STEP 1</p>
               <p className="text-sm text-white font-medium">
                 Wallet Information
@@ -280,15 +278,13 @@ export default function Send() {
             </div>
           </div>
 
-          {/* Line 1 */}
           <div
-            className={`h-0.5 w-24 ${step >= 2 ? "bg-blue-600" : "bg-gray-700"}`}
+            className={`h-0.5 w-24 ${step >= 2 ? "bg-blue-600" : "bg-gray-700"} -mt-10`}
           />
 
-          {/* Step 2 */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-4">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
                 step >= 2
                   ? step === 2
                     ? "bg-blue-600"
@@ -299,41 +295,38 @@ export default function Send() {
               <Icon.CoinsStacked02
                 size="lg"
                 color="#FFFFFF"
-                style={{ width: "28px", height: "28px" }}
+                style={{ width: "24px", height: "24px" }}
               />
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col gap-3">
               <p className="text-xs text-white/60">STEP 2</p>
               <p className="text-sm text-white font-medium">Select Currency</p>
             </div>
           </div>
 
-          {/* Line 2 */}
           <div
-            className={`h-0.5 w-24 ${step >= 3 ? "bg-blue-600" : "bg-gray-700"}`}
+            className={`h-0.5 w-24 ${step >= 3 ? "bg-blue-600" : "bg-gray-700"} -mt-10`}
           />
 
-          {/* Step 3 */}
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-4">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center transition-all ${
+              className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
                 step >= 3 ? "bg-blue-600" : "bg-gray-700"
               }`}
             >
               <Icon.ReceiptCheck
                 size="lg"
                 color="#FFFFFF"
-                style={{ width: "28px", height: "28px" }}
+                style={{ width: "24px", height: "24px" }}
               />
             </div>
-            <div className="text-center">
+            <div className="text-center flex flex-col gap-3">
               <p className="text-xs text-white/60">STEP 3</p>
               <p className="text-sm text-white font-medium">Memo & Receipt</p>
             </div>
           </div>
         </div>
 
-        {/* Content */}
         <div className="w-full">
           {step === 1 && (
             <div className="flex flex-col gap-6">
@@ -489,7 +482,6 @@ export default function Send() {
         </div>
       </div>
 
-      {/* Success Modal */}
       {showSuccessModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-[#202020] border border-white/10 rounded-3xl p-8 max-w-md w-full flex flex-col items-center gap-6">
@@ -518,7 +510,6 @@ export default function Send() {
         </div>
       )}
 
-      {/* Warning Modal */}
       {showWarningModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-[#202020] border border-red-500/30 rounded-3xl p-8 max-w-md w-full flex flex-col items-center gap-6">
