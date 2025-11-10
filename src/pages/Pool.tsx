@@ -342,7 +342,6 @@ const Pool: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="earnings-badge">+%18 Currently</span>
         </div>
         <div className="action-input-row">
           <input
@@ -410,7 +409,6 @@ const Pool: React.FC = () => {
               </p>
             </div>
           </div>
-          <span className="earnings-badge green">+$1,230.00 Earnings</span>
         </div>
         <div className="action-input-row">
           <input
