@@ -102,14 +102,26 @@ const Rewards: React.FC = () => {
         icon: <Icon.PiggyBank02 size="lg" />,
       },
     ],
-    [address],
+    [address]
   );
 
   const handleQuestClick = (quest: Quest) => {
     if (quest.completed) {
       setSelectedQuest(quest.id === selectedQuest ? null : quest.id);
     } else if (quest.actionPath) {
-      navigate(quest.actionPath);
+      // Add query parameter to indicate the action
+      const action =
+        quest.id === "create-envelope" || quest.id === "multiple-envelopes"
+          ? "create"
+          : quest.id === "envelope-deposit"
+            ? "deposit"
+            : undefined;
+
+      if (action) {
+        navigate(`${quest.actionPath}?action=${action}`);
+      } else {
+        navigate(quest.actionPath);
+      }
     }
   };
 

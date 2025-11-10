@@ -1,6 +1,7 @@
 import { Icon, Tooltip } from "@stellar/design-system";
 import type { Envelope } from "geko_envelopes";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import EnvelopeEditModal from "../components/EnvelopeEditModal";
 import { TOKEN_ADDRESSES } from "../components/modules/envelopes/constants";
 import { getTokenSymbol } from "../components/modules/envelopes/utils/tokenUtils";
@@ -48,6 +49,8 @@ export default function EnvelopesPage() {
     useEnvelopes(CONTRACT_ID);
   const { balances } = useWalletBalance();
   const { addNotification } = useNotification();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const nameInputRef = useRef<HTMLInputElement>(null);
 
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -78,6 +81,30 @@ export default function EnvelopesPage() {
       triggerCurrencyChange("XLM");
     }
   }, [token, triggerCurrencyChange]);
+
+  // Handle navigation from Rewards page
+  useEffect(() => {
+    const action = searchParams.get("action");
+    if (action === "create" || action === "deposit") {
+      // Expand the create section
+      setIsCreateExpanded(true);
+
+      // Focus on the name input after a short delay to ensure it's rendered
+      setTimeout(() => {
+        nameInputRef.current?.focus();
+        // Scroll to the create section
+        const createSection = document.querySelector(
+          ".create-envelope-section"
+        );
+        if (createSection) {
+          createSection.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+      }, 100);
+
+      // Remove the query parameter from URL after handling
+      setSearchParams({}, { replace: true });
+    }
+  }, [searchParams, setSearchParams]);
 
   if (isPending) {
     return (
@@ -289,8 +316,9 @@ export default function EnvelopesPage() {
         const errorMessage = e instanceof Error ? e.message : "Unknown error";
         const normalizedMessage = errorMessage.toLowerCase();
         const isBalanceError =
-          normalizedMessage.includes("resulting balance is not within the allowed range") ||
-          normalizedMessage.includes("error(contract, #10)");
+          normalizedMessage.includes(
+            "resulting balance is not within the allowed range"
+          ) || normalizedMessage.includes("error(contract, #10)");
 
         if (isBalanceError) {
           addNotification(
@@ -414,6 +442,7 @@ export default function EnvelopesPage() {
             <div className="form-field">
               <label className="form-label">Name</label>
               <input
+                ref={nameInputRef}
                 type="text"
                 className="form-input"
                 value={name}
