@@ -1,0 +1,15 @@
+{
+  "name": "Geko NFT #25",
+  "description": "A unique Geko NFT from the Geko collection. This is NFT #25 of 25.",
+  "image": "ipfs://https://maroon-casual-bedbug-472.mypinata.cloud/ipfs/bafybeia53ati25qjrz5k5gsanvczbmdpzbff7ytdru47g77o34och5wlva",
+  "attributes": [
+    {
+      "trait_type": "Token ID",
+      "value": "25"
+    },
+    {
+      "trait_type": "Collection",
+      "value": "Geko NFT"
+    }
+  ]
+}

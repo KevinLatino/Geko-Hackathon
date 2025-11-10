@@ -18,7 +18,9 @@
     "pool:distribute": "tsx src/blend/pool/distribute.ts",
     "pool:revoke-admin": "tsx src/blend/pool/revoke-admin.ts",
     "pool:verify": "tsx src/blend/pool/verify-pool.ts",
-    "token:deploy": "tsx src/geko-token/deploy-token.ts"
+    "token:deploy": "tsx src/geko-token/deploy-token.ts",
+    "nft:deploy": "tsx src/geko-nft/deploy-nft.ts",
+    "nft:admin-mint": "tsx src/geko-nft/admin-mint.ts"
   },
   "workspaces": [
     "packages/*"
@@ -32,10 +34,13 @@
     "@stellar/stellar-sdk": "^14.2.0",
     "@stellar/stellar-xdr-json": "^23.0.0",
     "@tanstack/react-query": "^5.90.2",
+    "@types/node-fetch": "^2.6.13",
+    "form-data": "^4.0.4",
     "framer-motion": "^12.23.24",
     "geko_envelopes": "^0.0.0",
     "lossless-json": "^4.2.0",
     "lucide-react": "^0.553.0",
+    "node-fetch": "^3.3.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
