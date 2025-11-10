@@ -10,10 +10,10 @@ import { TxParams, invokeSorobanOperation, signWithKeypair } from '../utils/tx.j
  * The pools will receive their configured emissions share.
  * 
  * Usage:
- *   npm run pool:distribute testnet admin '["Geko-Pool"]'
+ *   npm run pool:distribute testnet admin '["Test"]'
  * 
  * Or directly:
- *   tsx src/blend/pool/distribute.ts testnet admin '["Geko-Pool"]'
+ *   tsx src/blend/pool/distribute.ts testnet admin '["Test"]'
  * 
  * Note: You can specify multiple pools: '["Pool1","Pool2","Pool3"]'
  */

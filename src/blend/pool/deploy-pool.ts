@@ -54,7 +54,7 @@ const getTxParams = async (): Promise<TxParams> => {
 };
 
 /// Deployment Constants
-const pool_name = 'Geko-Pool';
+const pool_name = 'Test';
 // Backstop take rate: 0 = no backstop, 0.5e7 = 50% of interest goes to backstop
 // Set to 0 if you don't want to use backstop
 const backstop_take_rate = 0; // 0% = no backstop (no interest goes to backstop)
@@ -62,7 +62,7 @@ const max_positions = 8; // Maximum number of positions in the pool
 const min_collateral = BigInt(1000000); // Minimum collateral ($1 worth, scaled to 7 decimals)
 
 // Assets to add to the pool (must be defined in testnet.contracts.json)
-const reserves = ['XLM', 'USDC', 'GEKO'];
+const reserves = ['XLM', 'USDC'];
 
 // Reserve configurations
 const reserve_configs: ReserveConfigV2[] = [
@@ -96,21 +96,6 @@ const reserve_configs: ReserveConfigV2[] = [
     supply_cap: I128MAX,
     enabled: true,
   },
-  {
-    index: 0,
-    decimals: 7, // GEKO has 7 decimals
-    c_factor: 980_0000, // 98% collateral factor
-    l_factor: 980_0000, // 98% liability factor
-    util: 900_0000, // 90% target utilization
-    max_util: 980_0000, // 98% maximum utilization
-    r_base: 50000, // 0.5% base interest rate
-    r_one: 500000, // 5% interest rate increase below target util
-    r_two: 1000000, // 10% interest rate increase above target util
-    r_three: 1_0000000, // 100% interest rate increase above 95% util
-    reactivity: 1000,
-    supply_cap: I128MAX,
-    enabled: true,
-  },
 ];
 
 // Pool emission metadata - governs how pool emissions are distributed
@@ -122,11 +107,6 @@ const poolEmissionMetadata: ReserveEmissionMetadata[] = [
   },
   {
     res_index: 1, // Second reserve (USDC)
-    res_type: 1, // Supply emissions for lenders
-    share: BigInt(0.5e7), // 50% of total emissions
-  },
-  {
-    res_index: 2, // Third reserve (GEKO)
     res_type: 1, // Supply emissions for lenders
     share: BigInt(0.5e7), // 50% of total emissions
   },
