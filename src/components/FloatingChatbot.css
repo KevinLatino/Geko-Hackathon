@@ -192,6 +192,39 @@
   color: rgba(255, 255, 255, 0.4);
 }
 
+.floating-chatbot-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.floating-chatbot-send:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.floating-chatbot-send:disabled:hover {
+  transform: none;
+  box-shadow: none;
+  background: #2563eb;
+}
+
+/* Typing indicator */
+.floating-chatbot-typing {
+  color: rgba(255, 255, 255, 0.6);
+  font-style: italic;
+  animation: typingPulse 1.5s ease-in-out infinite;
+}
+
+@keyframes typingPulse {
+  0%, 100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .floating-chatbot-send {
   background: #2563eb;
   border: none;
