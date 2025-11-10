@@ -110,7 +110,7 @@ const FloatingChatbot: React.FC = () => {
 
   // Obtener URL del backend desde variables de entorno
   const backendUrl: string =
-    (import.meta.env.VITE_BACKEND_URL as string) || "http://localhost:4000";
+    (import.meta.env.VITE_BACKEND_URL as string) || "https://agent-langchain-production.up.railway.app";
 
   const handleOpen = () => {
     setIsOpen(true);
