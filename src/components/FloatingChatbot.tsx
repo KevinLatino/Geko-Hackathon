@@ -396,12 +396,6 @@ const FloatingChatbot: React.FC = () => {
             await createEnvelope(nameSnake, descriptionSnake, tokenContract);
             console.log("✅ Envelope creado exitosamente");
 
-            // Esperar un poco para que la transacción se procese en la blockchain
-            console.log(
-              "⏳ Esperando 2 segundos para que la transacción se procese..."
-            );
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-
             // Obtener la lista de envelopes después de crear
             console.log("📋 Obteniendo lista de envelopes después de crear...");
             const envelopesAfter = await listEnvelopes();
